@@ -2185,7 +2185,7 @@ async function placeOrder() {
   // Send owner notification email
   if (window.emailjs) {
     const itemSummary = cart.map(c => `${c.emoji} ${c.name}${c.spice?' ('+spL[c.spice]+')':''} x${c.qty}`).join(', ');
-    emailjs.send('service_5js624f', 'template_57i135h', {
+    emailjs.send('service_5js624f', 'template_ih2urfa', {
       order_num: orderNum,
       customer_name: name,
       customer_phone: phone,
