@@ -1023,7 +1023,7 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
       <span class="nav-icon">🚗</span> Delivery Settings
     </div>
     <div class="admin-nav-item" data-panel="orders" onclick="switchAdminPanel('orders')">
-      <span class="nav-icon">🛒</span> Orders <span id="admin-orders-badge" style="margin-left:auto;background:var(--accent);color:#1A1208;font-size:.7rem;padding:2px 6px;border-radius:10px;display:none"></span>
+      <span class="nav-icon">🛒</span> Orders <span id="admin-orders-badge" style="margin-left:auto;background:var(--accent);color:#1A1208;font-size:.7rem;padding:2px 6px;border-radius:10px;display:none"></span><span id="admin-chat-badge" style="margin-left:4px;background:#64B5F6;color:#1A1208;font-size:.7rem;padding:2px 6px;border-radius:10px;display:none">💬</span>
     </div>
     <div class="admin-nav-item" data-panel="inquiries" onclick="switchAdminPanel('inquiries')">
       <span class="nav-icon">📋</span> Inquiries <span id="admin-inquiry-badge" style="margin-left:auto;background:var(--accent);color:#1A1208;font-size:.7rem;padding:2px 6px;border-radius:10px;display:none"></span>
@@ -1165,11 +1165,18 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
       <div class="admin-card">
         <div class="admin-card-title">Add Reward Item</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-          <input class="admin-input" id="rw-emoji" placeholder="Emoji" maxlength="4" style="width:70px">
-          <input class="admin-input" id="rw-name" placeholder="Reward name (e.g. Free Biryani)" style="flex:1;min-width:180px">
           <input class="admin-input" id="rw-pts" type="number" placeholder="Points required" style="width:150px">
+          <select class="admin-select" id="rw-menu-item" style="flex:1;min-width:220px">
+            <option value="">— Pick a menu item —</option>
+          </select>
           <button class="btn-admin-add" onclick="adminAddReward()">+ Add Reward</button>
         </div>
+        <p style="font-size:.78rem;opacity:.5;margin-top:8px">When a customer redeems, the selected item is added to their cart for free.</p>
+      </div>
+      <div class="admin-card" style="border:1px solid rgba(232,160,32,.2);background:rgba(232,160,32,.04)">
+        <div class="admin-card-title">⚠️ Reset All Points</div>
+        <p style="font-size:.85rem;opacity:.7;margin-bottom:12px">Sets every customer's BT Points balance back to 0.</p>
+        <button class="admin-action-btn danger" onclick="adminResetAllPoints()">Reset Everyone's Points</button>
       </div>
       <div class="admin-card">
         <div class="admin-card-title">Current Rewards</div>
@@ -2128,14 +2135,18 @@ async function placeOrder() {
     status: 'new',
     user_id: user ? user.id : null
   });
-  // Award points if logged in
+  // Award points if logged in (non-blocking)
   if (!error && user) {
-    const pts = Math.floor(total * 10);
-    const { data: prof } = await _supa.from('profiles').select('points').eq('id', user.id).single();
-    const newPts = (prof ? prof.points : 0) + pts;
-    await _supa.from('profiles').update({ points: newPts }).eq('id', user.id);
-    if (currentUser) currentUser.points = newPts;
-    updateNavUser();
+    try {
+      const pts = Math.floor(total * 10);
+      const { data: prof } = await _supa.from('profiles').select('points').eq('id', user.id).maybeSingle();
+      if (prof) {
+        const newPts = (prof.points || 0) + pts;
+        await _supa.from('profiles').update({ points: newPts }).eq('id', user.id);
+        if (currentUser) currentUser.points = newPts;
+        updateNavUser();
+      }
+    } catch(e) { console.log('Points update skipped', e); }
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
@@ -2223,6 +2234,7 @@ async function renderOrders() {
       </div>`;
   });
   el.innerHTML = html;
+  updateAdminChatBadge();
 }
 
 async function updateOrderStatus(id, status) {
@@ -2425,6 +2437,7 @@ async function renderProfilePage() {
   const spiceLabel = { mild: 'Mild', medium: 'Medium', spicy: 'Spicy' };
   orders.forEach(o => { _pastOrdersMap[o.id] = o.items || []; });
   ordersEl.innerHTML = orders.map(order => {
+
     const date = new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const itemList = (order.items||[]).map(i => `${i.emoji} ${i.name}${i.spice ? ' (' + spiceLabel[i.spice] + ')' : ''} ×${i.qty}`).join(', ');
     const statusColors = { new: '#81C784', confirmed: 'var(--accent)', ready: '#64B5F6', completed: 'rgba(255,255,255,.4)' };
@@ -2439,7 +2452,7 @@ async function renderProfilePage() {
         <span style="font-size:.78rem;opacity:.5">${date} · ${order.order_type}</span>
         <div style="display:flex;gap:8px">
           <button class="reorder-btn" onclick="reorderById(${order.id})">Reorder</button>
-          <button class="chat-btn" onclick="toggleProfileOrderChat(${order.id})">💬 Chat</button>
+          <button class="chat-btn" onclick="toggleProfileOrderChat(${order.id})">💬 Chat <span id="chat-new-${order.id}" style="display:none;background:#64B5F6;color:#1A1208;font-size:.7rem;padding:1px 6px;border-radius:10px;font-weight:700">NEW</span></button>
         </div>
       </div>
       <div id="profile-chat-${order.id}" style="display:none">
@@ -2451,6 +2464,9 @@ async function renderProfilePage() {
       </div>
     </div>`;
   }).join('');
+
+  // Show NEW badges on chat buttons where admin has replied
+  updateUserChatBadges(orders);
 }
 
 async function loadProfileRewards() {
@@ -2465,24 +2481,41 @@ async function loadProfileRewards() {
     const canRedeem = userPts >= r.points_required;
     return `<div class="reward-card">
       <div class="reward-emoji">${r.emoji}</div>
-      <div class="reward-name">${r.name}</div>
+      <div class="reward-name">Free ${r.name}</div>
       <div class="reward-pts">${r.points_required} pts</div>
-      <button class="redeem-btn" ${canRedeem ? '' : 'disabled'} onclick="redeemReward(${r.id},'${r.name.replace(/'/g,"\\'")}',${r.points_required})">${canRedeem ? 'Redeem' : 'Need ' + (r.points_required - userPts) + ' more'}</button>
+      <button class="redeem-btn" ${canRedeem ? '' : 'disabled'} onclick="redeemReward(${r.id},'${r.name.replace(/'/g,"\\'")}',${r.points_required},'${r.menu_item_id||''}')">${canRedeem ? 'Add to Cart Free' : 'Need ' + (r.points_required - userPts) + ' more pts'}</button>
     </div>`;
   }).join('')}</div>`;
 }
 
-async function redeemReward(rewardId, rewardName, pts) {
+async function redeemReward(rewardId, rewardName, pts, menuItemId) {
   if (!currentUser) return;
-  if (!confirm(`Redeem "${rewardName}" for ${pts} BT Points?`)) return;
-  const { data: prof } = await _supa.from('profiles').select('points').eq('id', currentUser.id).single();
+  if (!confirm(`Redeem "Free ${rewardName}" for ${pts} BT Points? It will be added to your cart for free.`)) return;
+  const { data: prof } = await _supa.from('profiles').select('points').eq('id', currentUser.id).maybeSingle();
   const currentPts = prof ? prof.points : 0;
   if (currentPts < pts) { alert('Not enough points.'); return; }
   const newPts = currentPts - pts;
   await _supa.from('profiles').update({ points: newPts }).eq('id', currentUser.id);
   currentUser.points = newPts;
   updateNavUser();
-  alert(`🎉 "${rewardName}" redeemed! We'll apply it to your next order. Show this screen to your server.`);
+  // Add the free menu item to cart if linked
+  if (menuItemId) {
+    let foundItem = null;
+    Object.values(menuData).forEach(cat => {
+      [...(cat.veg||[]), ...(cat.nonVeg||[])].forEach(item => {
+        if (item.id === menuItemId) foundItem = item;
+      });
+    });
+    if (foundItem) {
+      cart.push({ id: foundItem.id + '_free', name: '🎁 FREE ' + foundItem.name, emoji: foundItem.emoji, spice: null, price: 0, qty: 1 });
+      updateCartUI();
+      alert(`🎉 "Free ${rewardName}" added to your cart!`);
+      closeCart();
+      openCart();
+    }
+  } else {
+    alert(`🎉 "Free ${rewardName}" redeemed! We'll apply it to your next order.`);
+  }
   renderProfilePage();
 }
 
@@ -2502,14 +2535,22 @@ function reorderById(orderId) {
 }
 
 // ==================== ORDER CHAT ====================
-const openChatOrders = {};
 const _pastOrdersMap = {}; // orderId → items, for reorder
+
+function _chatLastReadKey(orderId, role) { return `bt_chat_read_${orderId}_${role}`; }
+function _markChatRead(orderId, role) { localStorage.setItem(_chatLastReadKey(orderId, role), Date.now()); }
+function _chatLastRead(orderId, role) { return Number(localStorage.getItem(_chatLastReadKey(orderId, role)) || 0); }
 
 function toggleProfileOrderChat(orderId) {
   const el = document.getElementById('profile-chat-' + orderId);
   if (!el) return;
   if (el.style.display === 'none') {
     el.style.display = 'block';
+    _markChatRead(orderId, 'user');
+    // Clear NEW badge
+    const btn = el.previousElementSibling && el.previousElementSibling.querySelector ? null : null;
+    const newBadge = document.getElementById('chat-new-' + orderId);
+    if (newBadge) newBadge.style.display = 'none';
     loadOrderChatMessages(orderId, 'profile');
   } else {
     el.style.display = 'none';
@@ -2521,7 +2562,10 @@ function adminToggleOrderChat(orderId) {
   if (!el) return;
   if (el.style.display === 'none') {
     el.style.display = 'block';
+    _markChatRead(orderId, 'admin');
     loadOrderChatMessages(orderId, 'admin');
+    // Clear this order's chat badge indicator
+    updateAdminChatBadge();
   } else {
     el.style.display = 'none';
   }
@@ -2531,21 +2575,22 @@ async function loadOrderChatMessages(orderId, context) {
   const msgsId = context === 'admin' ? 'admin-chat-msgs-' + orderId : 'profile-chat-msgs-' + orderId;
   const el = document.getElementById(msgsId);
   if (!el) return;
-
   const { data: messages } = await _supa.from('order_messages').select('*').eq('order_id', orderId).order('created_at');
-  renderChatMessages(el, messages || []);
+  renderChatMessages(el, messages || [], context);
 }
 
-function renderChatMessages(el, messages) {
+function renderChatMessages(el, messages, context) {
   if (messages.length === 0) {
     el.innerHTML = '<p style="text-align:center;opacity:.4;font-size:.8rem;padding:16px">No messages yet</p>';
     return;
   }
   el.innerHTML = messages.map(msg => {
     const time = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    return `<div class="chat-msg ${msg.sender}">
+    // From admin's view: user msgs on left, admin on right; from user's view: admin on left, user on right
+    const isMe = context === 'admin' ? msg.sender === 'admin' : msg.sender === 'user';
+    return `<div class="chat-msg ${isMe ? 'admin' : 'user'}" style="align-self:${isMe?'flex-end':'flex-start'}">
       ${msg.message}
-      <div class="chat-msg-time">${msg.sender === 'admin' ? 'Restaurant' : 'You'} · ${time}</div>
+      <div class="chat-msg-time">${msg.sender === 'admin' ? 'Restaurant' : 'Customer'} · ${time}</div>
     </div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
@@ -2557,6 +2602,7 @@ async function userSendOrderMsg(orderId) {
   const msg = input.value.trim();
   input.value = '';
   await _supa.from('order_messages').insert({ order_id: orderId, sender: 'user', message: msg });
+  _markChatRead(orderId, 'user');
   loadOrderChatMessages(orderId, 'profile');
 }
 
@@ -2566,11 +2612,86 @@ async function adminSendOrderMsg(orderId) {
   const msg = input.value.trim();
   input.value = '';
   await _supa.from('order_messages').insert({ order_id: orderId, sender: 'admin', message: msg });
+  _markChatRead(orderId, 'admin');
   loadOrderChatMessages(orderId, 'admin');
 }
 
+// Check for unread user messages → show admin chat badge
+async function updateAdminChatBadge() {
+  const badge = document.getElementById('admin-chat-badge');
+  if (!badge) return;
+  const { data: msgs } = await _supa.from('order_messages').select('order_id, created_at, sender').eq('sender', 'user');
+  if (!msgs || msgs.length === 0) { badge.style.display = 'none'; return; }
+  // Group by order_id, find latest per order
+  const latestByOrder = {};
+  msgs.forEach(m => {
+    if (!latestByOrder[m.order_id] || m.created_at > latestByOrder[m.order_id]) {
+      latestByOrder[m.order_id] = m.created_at;
+    }
+  });
+  const unread = Object.entries(latestByOrder).filter(([orderId, ts]) => {
+    return new Date(ts).getTime() > _chatLastRead(orderId, 'admin');
+  });
+  if (unread.length > 0) {
+    badge.style.display = 'inline';
+    badge.textContent = '💬 ' + unread.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// Check for unread admin replies → show NEW badge on user's chat buttons
+async function updateUserChatBadges(orders) {
+  if (!orders || orders.length === 0) return;
+  const orderIds = orders.map(o => o.id);
+  const { data: msgs } = await _supa.from('order_messages').select('order_id, created_at, sender').eq('sender', 'admin');
+  if (!msgs) return;
+  const latestByOrder = {};
+  msgs.forEach(m => {
+    if (!latestByOrder[m.order_id] || m.created_at > latestByOrder[m.order_id]) {
+      latestByOrder[m.order_id] = m.created_at;
+    }
+  });
+  orderIds.forEach(orderId => {
+    const ts = latestByOrder[orderId];
+    const badge = document.getElementById('chat-new-' + orderId);
+    if (!badge) return;
+    if (ts && new Date(ts).getTime() > _chatLastRead(orderId, 'user')) {
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+}
+
 // ==================== REWARDS ADMIN ====================
+
+function buildMenuItemOptions() {
+  // Build flat list of all menu items for the dropdown
+  const sel = document.getElementById('rw-menu-item');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Pick a menu item —</option>';
+  const catNames = { appetizers:'Appetizers', biryanis:'Biryanis', curries:'Curries', rice:'Rice & Noodles', naans:'Naans', sides:'Sides', desserts:'Desserts' };
+  Object.entries(menuData).forEach(([cat, data]) => {
+    const allItems = [...(data.veg||[]).map(i=>({...i,type:'Veg'})), ...(data.nonVeg||[]).map(i=>({...i,type:'Non-Veg'}))];
+    if (allItems.length === 0) return;
+    const grp = document.createElement('optgroup');
+    grp.label = catNames[cat] || cat;
+    allItems.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.id;
+      opt.dataset.name = item.name;
+      opt.dataset.emoji = item.emoji;
+      opt.dataset.price = item.price;
+      opt.textContent = `${item.emoji} ${item.name} — $${item.price.toFixed(2)}`;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+}
+
 async function renderRewardsAdmin() {
+  buildMenuItemOptions();
   const el = document.getElementById('rewards-admin-list');
   if (!el) return;
   const { data: rewards } = await _supa.from('reward_items').select('*').order('created_at', { ascending: false });
@@ -2580,8 +2701,8 @@ async function renderRewardsAdmin() {
   }
   el.innerHTML = `<div class="reward-admin-grid">${rewards.map(r => `
     <div class="reward-admin-card ${r.active ? '' : 'inactive'}">
-      <div style="font-size:1.8rem;margin-bottom:6px">${r.emoji}</div>
-      <div style="font-weight:500;font-size:.9rem;margin-bottom:4px">${r.name}</div>
+      <div style="font-size:1.8rem;margin-bottom:4px">${r.emoji}</div>
+      <div style="font-weight:500;font-size:.9rem;margin-bottom:2px">Free ${r.name}</div>
       <div style="font-family:var(--font-display);color:var(--gold);margin-bottom:10px">${r.points_required} pts</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;font-size:.75rem;cursor:pointer">
@@ -2593,15 +2714,24 @@ async function renderRewardsAdmin() {
 }
 
 async function adminAddReward() {
-  const emoji = document.getElementById('rw-emoji').value.trim() || '🎁';
-  const name = document.getElementById('rw-name').value.trim();
   const pts = Number(document.getElementById('rw-pts').value);
-  if (!name || !pts) { alert('Name and points required.'); return; }
-  await _supa.from('reward_items').insert({ emoji, name, points_required: pts, active: true });
-  document.getElementById('rw-emoji').value = '';
-  document.getElementById('rw-name').value = '';
+  const sel = document.getElementById('rw-menu-item');
+  const selectedOpt = sel.options[sel.selectedIndex];
+  if (!pts || !sel.value) { alert('Select a menu item and enter points required.'); return; }
+  const name = selectedOpt.dataset.name;
+  const emoji = selectedOpt.dataset.emoji;
+  const menu_item_id = sel.value;
+  await _supa.from('reward_items').insert({ emoji, name, points_required: pts, active: true, menu_item_id });
   document.getElementById('rw-pts').value = '';
+  sel.value = '';
   renderRewardsAdmin();
+}
+
+async function adminResetAllPoints() {
+  if (!confirm('Reset ALL customers\' BT Points to 0? This cannot be undone.')) return;
+  await _supa.from('profiles').update({ points: 0 }).gte('points', 0);
+  if (currentUser) { currentUser.points = 0; updateNavUser(); }
+  alert('All customer points have been reset to 0.');
 }
 
 async function toggleRewardActive(id, active) {
