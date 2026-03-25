@@ -2242,7 +2242,7 @@ async function renderOrders() {
       </div>`;
   });
   el.innerHTML = html;
-  updateAdminChatBadge();
+  updateAdminChatBadge(orders.map(o => o.id));
 }
 
 async function updateOrderStatus(id, status) {
@@ -2627,10 +2627,11 @@ async function adminSendOrderMsg(orderId) {
 }
 
 // Check for unread user messages → show admin chat badge
-async function updateAdminChatBadge() {
+async function updateAdminChatBadge(visibleOrderIds) {
   const badge = document.getElementById('admin-chat-badge');
   if (!badge) return;
-  const { data: msgs } = await _supa.from('order_messages').select('order_id, created_at, sender').eq('sender', 'user');
+  if (!visibleOrderIds || visibleOrderIds.length === 0) { badge.style.display = 'none'; return; }
+  const { data: msgs } = await _supa.from('order_messages').select('order_id, created_at, sender').eq('sender', 'user').in('order_id', visibleOrderIds);
   if (!msgs || msgs.length === 0) { badge.style.display = 'none'; return; }
   // Group by order_id, find latest per order
   const latestByOrder = {};
