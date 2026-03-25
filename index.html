@@ -445,6 +445,18 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
 .announcement-input:focus{border-color:var(--accent)}
 .delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .delivery-setting{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:4px;padding:20px;display:flex;justify-content:space-between;align-items:center}
+
+/* ANALYTICS */
+.an-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.an-tab{padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--cream);font-family:var(--font-body);font-size:.82rem;cursor:pointer;border-radius:50px;opacity:.6;transition:all .2s}
+.an-tab:hover{opacity:1;border-color:var(--accent)}
+.an-tab.active{background:var(--accent);border-color:var(--accent);color:#1A1208;opacity:1;font-weight:600}
+.an-chart{display:flex;align-items:flex-end;gap:5px;height:200px;padding:4px 0 0}
+.an-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;min-width:0}
+.an-bar-value{font-size:.65rem;color:var(--accent);text-align:center;height:20px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.an-bar-outer{flex:1;width:100%;display:flex;align-items:flex-end;background:rgba(255,255,255,.05);border-radius:3px 3px 0 0;overflow:hidden}
+.an-bar-inner{width:100%;background:linear-gradient(180deg,var(--accent),rgba(212,105,42,.4));border-radius:3px 3px 0 0;transition:height .5s cubic-bezier(.4,0,.2,1)}
+.an-bar-label{font-size:.65rem;color:var(--cream);opacity:.45;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;padding-top:4px}
 .delivery-setting-info h4{font-family:var(--font-sub);font-size:1rem;font-weight:600;margin-bottom:4px}
 .delivery-setting-info p{font-size:.8rem;opacity:.6}
 
@@ -1121,6 +1133,9 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
     <div class="admin-nav-item" data-panel="rewards" onclick="switchAdminPanel('rewards')">
       <span class="nav-icon">🎁</span> Rewards
     </div>
+    <div class="admin-nav-item" data-panel="analytics" onclick="switchAdminPanel('analytics')">
+      <span class="nav-icon">📊</span> Analytics
+    </div>
     <div class="admin-logout"><button onclick="adminLogout()">Sign Out</button></div>
   </aside>
 
@@ -1269,6 +1284,19 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
         <div class="admin-card-title">Current Rewards</div>
         <div id="rewards-admin-list"><p style="opacity:.5;font-size:.85rem">No rewards yet. Add one above.</p></div>
       </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-panel" id="panel-analytics">
+      <div class="admin-page-title">Analytics</div>
+      <div class="admin-page-sub">Revenue and order performance</div>
+      <div class="an-tabs">
+        <button class="an-tab" id="an-tab-today" onclick="renderAnalytics('today')">Today</button>
+        <button class="an-tab active" id="an-tab-week" onclick="renderAnalytics('week')">Week</button>
+        <button class="an-tab" id="an-tab-month" onclick="renderAnalytics('month')">Month</button>
+        <button class="an-tab" id="an-tab-6month" onclick="renderAnalytics('6month')">6 Months</button>
+      </div>
+      <div id="analytics-content"></div>
     </div>
 
   </main>
@@ -1999,6 +2027,124 @@ function closeInvoiceModal() {
 
 function printInvoice() { window.print(); }
 
+// ==================== ANALYTICS ====================
+let _anPeriod = 'week';
+
+async function renderAnalytics(period) {
+  _anPeriod = period || _anPeriod;
+  ['today','week','month','6month'].forEach(p => {
+    const btn = document.getElementById('an-tab-' + p);
+    if (btn) btn.classList.toggle('active', p === _anPeriod);
+  });
+  const el = document.getElementById('analytics-content');
+  if (!el) return;
+  el.innerHTML = '<p style="opacity:.4;font-size:.85rem;padding:20px 0">Loading...</p>';
+
+  const resetISO = localStorage.getItem('btAnalyticsReset') || '2000-01-01T00:00:00Z';
+  const now = new Date();
+  let periodSince;
+  if (_anPeriod === 'today') periodSince = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  else if (_anPeriod === 'week') periodSince = new Date(now - 7*86400000);
+  else if (_anPeriod === 'month') periodSince = new Date(now - 30*86400000);
+  else periodSince = new Date(now - 180*86400000);
+  const sinceISO = new Date(Math.max(periodSince.getTime(), new Date(resetISO).getTime())).toISOString();
+
+  const { data: orders } = await _supa.from('orders')
+    .select('subtotal, created_at, status')
+    .gte('created_at', sinceISO)
+    .not('admin_hidden', 'is', true)
+    .neq('status', 'cancelled');
+
+  const all = orders || [];
+  const totalRev = all.reduce((s,o) => s + (parseFloat(o.subtotal)||0), 0);
+  const totalOrd = all.length;
+  const avgOrd = totalOrd ? totalRev / totalOrd : 0;
+
+  // Build chart buckets
+  let buckets = [];
+  if (_anPeriod === 'today') {
+    const hrs = {};
+    for (let h = 0; h < 24; h++) hrs[h] = 0;
+    all.forEach(o => { const h = new Date(o.created_at).getHours(); hrs[h] += parseFloat(o.subtotal||0); });
+    // Show 9am–11pm (15 bars)
+    for (let h = 9; h <= 23; h++) {
+      const lbl = h < 12 ? h+'am' : h === 12 ? '12pm' : (h-12)+'pm';
+      buckets.push({label: lbl, value: hrs[h]||0});
+    }
+  } else if (_anPeriod === 'week') {
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const map = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now - i*86400000);
+      map[d.toISOString().slice(0,10)] = 0;
+    }
+    all.forEach(o => { const k = new Date(o.created_at).toISOString().slice(0,10); if (k in map) map[k] += parseFloat(o.subtotal||0); });
+    buckets = Object.entries(map).map(([k,v]) => ({label: days[new Date(k+'T12:00').getDay()], value: v}));
+  } else if (_anPeriod === 'month') {
+    const wks = [{label:'Wk 4',value:0},{label:'Wk 3',value:0},{label:'Wk 2',value:0},{label:'This Wk',value:0}];
+    all.forEach(o => {
+      const dAgo = Math.floor((now - new Date(o.created_at)) / 86400000);
+      const wi = Math.min(3, Math.floor(dAgo / 7));
+      wks[3 - wi].value += parseFloat(o.subtotal||0);
+    });
+    buckets = wks;
+  } else {
+    const mths = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      mths.push({label: d.toLocaleDateString('en-US',{month:'short'}), key: d.toISOString().slice(0,7), value: 0});
+    }
+    all.forEach(o => { const k = new Date(o.created_at).toISOString().slice(0,7); const m = mths.find(x=>x.key===k); if(m) m.value += parseFloat(o.subtotal||0); });
+    buckets = mths;
+  }
+
+  const maxVal = Math.max(...buckets.map(b=>b.value), 1);
+  const bars = buckets.map(b => `
+    <div class="an-bar-col">
+      <div class="an-bar-value">${b.value > 0 ? '$'+Math.round(b.value) : ''}</div>
+      <div class="an-bar-outer">
+        <div class="an-bar-inner" style="height:${b.value > 0 ? Math.max((b.value/maxVal)*100, 4) : 0}%"></div>
+      </div>
+      <div class="an-bar-label">${b.label}</div>
+    </div>`).join('');
+
+  const periodLabel = {today:'Today by Hour',week:'Last 7 Days',month:'Last 30 Days','6month':'Last 6 Months'}[_anPeriod];
+  const resetLabel = localStorage.getItem('btAnalyticsReset')
+    ? new Date(localStorage.getItem('btAnalyticsReset')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+    : 'All time';
+
+  el.innerHTML = `
+    <div class="stat-grid" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-num" style="font-size:1.8rem;color:var(--accent)">$${totalRev.toFixed(0)}</div>
+        <div class="stat-label">Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${totalOrd}</div>
+        <div class="stat-label">Orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="font-size:1.8rem">$${avgOrd.toFixed(0)}</div>
+        <div class="stat-label">Avg Order</div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-title">${periodLabel}</div>
+      <div class="an-chart">${bars}</div>
+    </div>
+    <div class="admin-card" style="border:1px solid rgba(229,57,53,.25);background:rgba(229,57,53,.04)">
+      <div class="admin-card-title" style="color:#ef9a9a">⚠️ Reset Analytics</div>
+      <p style="font-size:.85rem;opacity:.7;margin-bottom:12px">Resets the tracking start date to now. Order history is always preserved — this only affects what's counted in analytics. Currently tracking from: <strong>${resetLabel}</strong></p>
+      <button class="admin-action-btn danger" onclick="resetAnalytics()">Reset Analytics</button>
+    </div>`;
+}
+
+function resetAnalytics() {
+  if (!confirm('Reset analytics? Future data will be tracked from today. All order history is kept.')) return;
+  localStorage.setItem('btAnalyticsReset', new Date().toISOString());
+  renderAnalytics(_anPeriod);
+}
+
 // ==================== ADMIN AUTH ====================
 function doLogin() {
   const pw = document.getElementById('admin-pw').value;
@@ -2033,6 +2179,7 @@ function switchAdminPanel(panel) {
   if (panel === 'inquiries') renderInquiries();
   if (panel === 'announcements') renderAnnouncements();
   if (panel === 'rewards') renderRewardsAdmin();
+  if (panel === 'analytics') renderAnalytics();
 }
 
 // ---- DASHBOARD ----
