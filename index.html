@@ -961,7 +961,7 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
           <input type="tel" class="form-input" id="co-phone" placeholder="(xxx) xxx-xxxx" required>
         </div>
         <div class="form-group full">
-          <label class="form-label">Email</label>
+          <label class="form-label">Email <span style="font-weight:400;opacity:.6;font-size:.8rem">(optional — for order receipt)</span></label>
           <input type="email" class="form-input" id="co-email" placeholder="your@email.com">
         </div>
         <div class="form-group full" id="checkout-address-group">
@@ -2185,16 +2185,24 @@ async function placeOrder() {
   // Send owner notification email
   if (window.emailjs) {
     const itemSummary = cart.map(c => `${c.emoji} ${c.name}${c.spice?' ('+spL[c.spice]+')':''} x${c.qty}`).join(', ');
-    emailjs.send('service_5js624f', 'template_ih2urfa', {
+    const customerEmail = document.getElementById('co-email').value.trim();
+    const emailParams = {
       order_num: orderNum,
       customer_name: name,
       customer_phone: phone,
-      customer_email: document.getElementById('co-email').value.trim() || 'Not provided',
+      customer_email: customerEmail || 'Not provided',
       order_type: selectedOrderType,
       order_items: itemSummary,
       order_total: '$' + total.toFixed(2),
-      order_notes: document.getElementById('co-notes').value.trim() || 'None'
-    }, 'p7RtWcIqypXH4e5-7').catch(()=>{});
+      order_notes: document.getElementById('co-notes').value.trim() || 'None',
+      order_address: document.getElementById('co-address').value.trim() || 'N/A'
+    };
+    // Notify owner
+    emailjs.send('service_5js624f', 'template_ih2urfa', emailParams, 'p7RtWcIqypXH4e5-7').catch(()=>{});
+    // Send receipt to customer
+    if (customerEmail) {
+      emailjs.send('service_5js624f', 'template_tiyr5bc', { ...emailParams, to_email: customerEmail }, 'p7RtWcIqypXH4e5-7').catch(()=>{});
+    }
   }
 
   ['co-name','co-phone','co-email','co-address','co-notes'].forEach(id => {
