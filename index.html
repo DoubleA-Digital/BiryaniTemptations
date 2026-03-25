@@ -1664,7 +1664,7 @@ async function renderAdminDashboard() {
 
   // Fetch live counts from Supabase
   const [{ data: orders }, { data: inquiries }] = await Promise.all([
-    _supa.from('orders').select('*').order('created_at', { ascending: false }),
+    _supa.from('orders').select('*').not('admin_hidden', 'is', true).order('created_at', { ascending: false }),
     _supa.from('inquiries').select('*').order('created_at', { ascending: false })
   ]);
   const newOrders = (orders||[]).filter(o => o.status === 'new').length;
@@ -2181,7 +2181,7 @@ async function renderOrders() {
   if (!el) return;
   el.innerHTML = '<p style="opacity:.5;font-size:.85rem">Loading orders...</p>';
 
-  const { data: orders, error } = await _supa.from('orders').select('*').order('created_at', { ascending: false });
+  const { data: orders, error } = await _supa.from('orders').select('*').not('admin_hidden', 'is', true).order('created_at', { ascending: false });
   if (error) { el.innerHTML = '<p style="color:tomato">Failed to load orders.</p>'; return; }
 
   const newOrders = (orders||[]).filter(o => o.status === 'new').length;
@@ -2250,8 +2250,8 @@ async function updateOrderStatus(id, status) {
   renderOrders();
 }
 async function deleteOrder(id) {
-  if (!confirm('Delete this order?')) return;
-  await _supa.from('orders').delete().eq('id', id);
+  if (!confirm('Delete this order? The customer will still be able to see it in their order history.')) return;
+  await _supa.from('orders').update({ admin_hidden: true }).eq('id', id);
   renderOrders();
 }
 
