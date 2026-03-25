@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // Replace YOUR_BT_PUBLIC_KEY with your actual EmailJS public key
+  (function(){ if(window.emailjs) emailjs.init({ publicKey: 'p7RtWcIqypXH4e5-7' }); })();
+</script>
 <style>
 :root {
   --bg: #1A1208;
@@ -981,6 +986,7 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
       <div class="order-confirm-icon">✅</div>
       <h3>Order Placed!</h3>
       <div class="order-num" id="order-num-display"></div>
+      <div id="order-confirm-summary" style="text-align:left;background:rgba(255,255,255,.04);border-radius:8px;padding:14px 16px;margin:16px 0;font-size:.85rem;line-height:1.8"></div>
       <p>We've received your order and will confirm shortly.<br>
       Questions? Call <a href="tel:8182803366" style="color:var(--accent)">(818) 280-3366</a></p>
       <button class="btn-primary" style="margin-top:24px" onclick="closeCheckout();clearCart()">Done</button>
@@ -1348,6 +1354,9 @@ function ls(key, def) {
 function lsSet(key, val) {
   try { localStorage.setItem('bt_' + key, JSON.stringify(val)); } catch(e) {}
 }
+
+// ==================== HELPERS ====================
+const _esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 // ==================== SUPABASE ====================
 const _supa = supabase.createClient(
@@ -1906,7 +1915,7 @@ async function renderInquiries() {
       <td>
         <strong>${inq.name}</strong><br>
         <span style="font-size:.78rem;opacity:.6">${inq.phone} · ${inq.email}</span>
-        ${inq.notes ? `<div class="inquiry-detail">${inq.notes}</div>` : ''}
+        ${inq.notes ? `<div class="inquiry-detail">${_esc(inq.notes)}</div>` : ''}
       </td>
       <td>${inq.event_type||'—'}</td>
       <td>${inq.tray_size||'—'}</td>
@@ -2166,8 +2175,27 @@ async function placeOrder() {
   }
 
   document.getElementById('order-num-display').textContent = orderNum;
+  // Build order summary for confirmation screen
+  const spL = { mild:'Mild', medium:'Medium', spicy:'Spicy' };
+  const itemLines = cart.map(c => `<div style="display:flex;justify-content:space-between"><span>${c.emoji} ${_esc(c.name)}${c.spice?' ('+spL[c.spice]+')':''} ×${c.qty}</span><span>$${(c.price*c.qty).toFixed(2)}</span></div>`).join('');
+  document.getElementById('order-confirm-summary').innerHTML = itemLines + `<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-weight:600"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
   document.getElementById('checkout-form-wrap').style.display = 'none';
   document.getElementById('order-confirm').style.display = 'block';
+
+  // Send owner notification email
+  if (window.emailjs) {
+    const itemSummary = cart.map(c => `${c.emoji} ${c.name}${c.spice?' ('+spL[c.spice]+')':''} x${c.qty}`).join(', ');
+    emailjs.send('service_5js624f', 'template_57i135h', {
+      order_num: orderNum,
+      customer_name: name,
+      customer_phone: phone,
+      customer_email: document.getElementById('co-email').value.trim() || 'Not provided',
+      order_type: selectedOrderType,
+      order_items: itemSummary,
+      order_total: '$' + total.toFixed(2),
+      order_notes: document.getElementById('co-notes').value.trim() || 'None'
+    }, 'p7RtWcIqypXH4e5-7').catch(()=>{});
+  }
 
   ['co-name','co-phone','co-email','co-address','co-notes'].forEach(id => {
     const el = document.getElementById(id);
@@ -2217,7 +2245,7 @@ async function renderOrders() {
           <strong>${order.customer_name}</strong> · ${order.customer_phone}
           ${order.customer_email ? `<span style="opacity:.6"> · ${order.customer_email}</span>` : ''}
           ${order.address ? `<div style="font-size:.82rem;opacity:.6;margin-top:2px">📍 ${order.address}</div>` : ''}
-          ${order.notes ? `<div style="font-size:.82rem;opacity:.6;margin-top:2px;font-style:italic">💬 ${order.notes}</div>` : ''}
+          ${order.notes ? `<div style="font-size:.82rem;opacity:.6;margin-top:2px;font-style:italic">💬 ${_esc(order.notes)}</div>` : ''}
         </div>
         <div style="margin-bottom:12px">${itemsHtml}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -2449,7 +2477,7 @@ async function renderProfilePage() {
 
     const date = new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const itemList = (order.items||[]).map(i => `${i.emoji} ${i.name}${i.spice ? ' (' + spiceLabel[i.spice] + ')' : ''} ×${i.qty}`).join(', ');
-    const statusColors = { new: '#81C784', confirmed: 'var(--accent)', ready: '#64B5F6', completed: 'rgba(255,255,255,.4)' };
+    const statusColors = { new: '#81C784', confirmed: 'var(--accent)', ready: '#64B5F6', completed: 'rgba(255,255,255,.4)', cancelled: '#e53935' };
     return `<div class="past-order-card">
       <div class="past-order-header">
         <span class="past-order-num">${order.order_num}</span>
@@ -2462,6 +2490,7 @@ async function renderProfilePage() {
         <div style="display:flex;gap:8px">
           <button class="reorder-btn" onclick="reorderById(${order.id})">Reorder</button>
           <button class="chat-btn" style="position:relative" onclick="toggleProfileOrderChat(${order.id})">💬 Chat<span id="chat-new-${order.id}" style="display:none;position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#e53935;border-radius:50%;border:2px solid #1A1208"></span></button>
+          ${order.status === 'new' ? `<button class="reorder-btn" style="background:transparent;border-color:rgba(229,57,53,.5);color:#e53935" onclick="cancelOrder(${order.id})">Cancel</button>` : ''}
         </div>
       </div>
       <div id="profile-chat-${order.id}" style="display:none">
@@ -2541,6 +2570,13 @@ function reorderById(orderId) {
   });
   updateCartUI();
   openCart();
+}
+
+async function cancelOrder(orderId) {
+  if (!confirm('Cancel this order? This cannot be undone.')) return;
+  const { error } = await _supa.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
+  if (error) { alert('Could not cancel order. Please call us at (818) 280-3366.'); return; }
+  renderProfilePage();
 }
 
 // ==================== ORDER CHAT ====================
@@ -2771,6 +2807,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initAuth();
   // Refresh status every minute
   setInterval(() => { loadData(); updateStatusBadge(); }, 60000);
+  // Auto-refresh order status on profile page every 30 seconds
+  setInterval(() => { if (currentPage === 'profile' && currentUser) renderProfilePage(); }, 30000);
   handleHash();
   // Close auth overlay on background click
   document.getElementById('auth-overlay').addEventListener('click', function(e) {
