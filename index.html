@@ -2288,6 +2288,7 @@ async function initAuth() {
   _supa.auth.onAuthStateChange(async (event, session) => {
     if (session && session.user) {
       await loadUserProfile(session.user);
+      if (currentPage === 'profile') renderProfilePage();
     } else {
       currentUser = null;
       updateNavUser();
@@ -2754,12 +2755,12 @@ async function deleteReward(id) {
 }
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadData();
   loadAnnouncement();
   updateStatusBadge();
   updateCartUI();
-  initAuth();
+  await initAuth();
   // Refresh status every minute
   setInterval(() => { loadData(); updateStatusBadge(); }, 60000);
   handleHash();
