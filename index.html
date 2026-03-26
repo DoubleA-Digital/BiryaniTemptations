@@ -1283,6 +1283,19 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
       </div>
     </div>
 
+      <div class="admin-card">
+        <div class="admin-card-title">📧 Email Notifications</div>
+        <p style="font-size:.85rem;opacity:.7;margin-bottom:14px">Controls both the owner order alert and the customer receipt email. Turn off if emails are causing issues.</p>
+        <div style="display:flex;align-items:center;gap:16px">
+          <label class="toggle-switch">
+            <input type="checkbox" id="email-toggle" onchange="setEmailsEnabled(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="email-toggle-label" style="font-size:.9rem"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- REWARDS MANAGER -->
     <div class="admin-panel" id="panel-rewards">
       <div class="admin-page-title">Rewards Manager</div>
@@ -2004,8 +2017,10 @@ async function submitCateringInquiry(e) {
       subtotal: '$'+subtotal.toFixed(2), tax_amount: '$'+taxAmt.toFixed(2),
       grand_total: '$'+total.toFixed(2), notes: notes||'None'
     };
-    emailjs.send('service_5js624f','template_ih2urfa',ep,'p7RtWcIqypXH4e5-7').catch(()=>{});
-    if (email) emailjs.send('service_5js624f','TEMPLATE_CATERING_INVOICE',{...ep,to_email:email},'p7RtWcIqypXH4e5-7').catch(()=>{});
+    if (ls('bt_emails_enabled', true)) {
+      emailjs.send('service_5js624f','template_ih2urfa',ep,'p7RtWcIqypXH4e5-7').catch(()=>{});
+      if (email) emailjs.send('service_5js624f','TEMPLATE_CATERING_INVOICE',{...ep,to_email:email},'p7RtWcIqypXH4e5-7').catch(()=>{});
+    }
   }
 
   document.getElementById('catering-form').style.display = 'none';
@@ -2602,6 +2617,18 @@ function renderAnnouncements() {
   const preview = document.getElementById('announcement-preview');
   if (msg) { preview.textContent = msg; preview.style.opacity = '1'; }
   else { preview.textContent = 'No active announcement'; preview.style.opacity = '.4'; }
+  // Sync email toggle
+  const enabled = ls('bt_emails_enabled', true);
+  const tog = document.getElementById('email-toggle');
+  const lbl = document.getElementById('email-toggle-label');
+  if (tog) tog.checked = enabled;
+  if (lbl) { lbl.textContent = enabled ? 'Emails ON — customers and owner will receive emails' : 'Emails OFF — no emails will be sent'; lbl.style.color = enabled ? '#4CAF50' : '#e53935'; }
+}
+
+function setEmailsEnabled(val) {
+  lsSet('bt_emails_enabled', val);
+  const lbl = document.getElementById('email-toggle-label');
+  if (lbl) { lbl.textContent = val ? 'Emails ON — customers and owner will receive emails' : 'Emails OFF — no emails will be sent'; lbl.style.color = val ? '#4CAF50' : '#e53935'; }
 }
 
 function saveAnnouncement() {
@@ -2895,7 +2922,7 @@ async function placeOrder() {
   }
 
   // Emails — fire and forget, never block the user
-  if (window.emailjs) {
+  if (window.emailjs && ls('bt_emails_enabled', true)) {
     const itemSummary = cartSnapshot.map(c => `${c.emoji} ${c.name}${c.spice?' ('+spL[c.spice]+')':''} x${c.qty}`).join(', ');
     const emailParams = {
       order_num: orderNum, customer_name: name, customer_phone: phone,
