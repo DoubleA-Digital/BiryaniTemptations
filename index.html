@@ -67,7 +67,8 @@ img{max-width:100%;display:block}
 
 /* PAGES */
 .page{display:none}
-.page.active{display:block}
+.page.active{display:block;animation:pageIn .25s ease}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* HERO */
 #hero-page{min-height:100vh;position:relative;display:flex;flex-direction:column}
@@ -2876,16 +2877,20 @@ function confirmSpice(level) {
 let currentUser = null; // { id, email, name, phone, points }
 
 async function initAuth() {
-  const { data: { user } } = await _supa.auth.getUser();
-  if (user) await loadUserProfile(user);
+  // getSession() reads from localStorage instantly — no network round-trip
+  // This is why refresh was logging users out: getUser() hits the server and
+  // can fail or return null before the token refresh completes
+  const { data: { session } } = await _supa.auth.getSession();
+  if (session && session.user) await loadUserProfile(session.user);
 
   _supa.auth.onAuthStateChange(async (event, session) => {
-    if (session && session.user) {
-      await loadUserProfile(session.user);
-      if (currentPage === 'profile') renderProfilePage();
-    } else {
+    if (event === 'SIGNED_OUT') {
       currentUser = null;
       updateNavUser();
+      if (currentPage === 'profile') renderProfilePage();
+    } else if (session && session.user) {
+      await loadUserProfile(session.user);
+      if (currentPage === 'profile') renderProfilePage();
     }
   });
 }
@@ -3056,7 +3061,7 @@ async function renderProfilePage() {
         <div style="display:flex;gap:8px">
           <button class="reorder-btn" onclick="reorderById(${order.id})">Reorder</button>
           <button class="chat-btn" style="position:relative" onclick="toggleProfileOrderChat(${order.id})">💬 Chat<span id="chat-new-${order.id}" style="display:none;position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#e53935;border-radius:50%;border:2px solid #1A1208"></span></button>
-          ${order.status === 'new' ? `<button class="reorder-btn" style="background:transparent;border-color:rgba(229,57,53,.5);color:#e53935" onclick="cancelOrder(${order.id})">Cancel</button>` : ''}
+          ${order.status === 'new' ? `<button id="cancel-btn-${order.id}" class="reorder-btn" style="background:transparent;border-color:rgba(229,57,53,.5);color:#e53935" onclick="cancelOrder(${order.id})">Cancel Order</button>` : ''}
         </div>
       </div>
       <div id="profile-chat-${order.id}" style="display:none">
@@ -3139,9 +3144,32 @@ function reorderById(orderId) {
 }
 
 async function cancelOrder(orderId) {
-  if (!confirm('Cancel this order? This cannot be undone.')) return;
+  const btn = document.getElementById('cancel-btn-' + orderId);
+  if (!btn) return;
+  if (btn.dataset.confirm !== 'yes') {
+    btn.dataset.confirm = 'yes';
+    btn.textContent = 'Tap again to confirm';
+    btn.style.borderColor = '#e53935';
+    btn.style.background = 'rgba(229,57,53,.15)';
+    setTimeout(() => {
+      if (btn.dataset.confirm === 'yes') {
+        btn.dataset.confirm = '';
+        btn.textContent = 'Cancel Order';
+        btn.style.background = 'transparent';
+      }
+    }, 3000);
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Cancelling...';
   const { error } = await _supa.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
-  if (error) { alert('Could not cancel order. Please call us at (818) 280-3366.'); return; }
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Cancel Order';
+    btn.dataset.confirm = '';
+    alert('Could not cancel. Please call us at (818) 280-3366.');
+    return;
+  }
   renderProfilePage();
 }
 
