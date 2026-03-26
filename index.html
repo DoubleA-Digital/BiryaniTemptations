@@ -1592,10 +1592,10 @@ const _supa = supabase.createClient(
 );
 
 function loadData() {
-  // Reset menu if version changed (new single-price format)
-  if (ls('menuVersion', 1) < 2) {
+  // Reset menu if version changed
+  if (ls('menuVersion', 1) < 3) {
     lsSet('menuData', DEFAULT_MENU);
-    lsSet('menuVersion', 2);
+    lsSet('menuVersion', 3);
   }
   menuData = ls('menuData', DEFAULT_MENU);
   hoursData = ls('hours', DEFAULT_HOURS);
