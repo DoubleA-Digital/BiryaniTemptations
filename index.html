@@ -1180,6 +1180,9 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
     <div class="admin-nav-item" data-panel="analytics" onclick="switchAdminPanel('analytics')">
       <span class="nav-icon">📊</span> Analytics
     </div>
+    <div class="admin-nav-item" data-panel="settings" onclick="switchAdminPanel('settings')">
+      <span class="nav-icon">⚙️</span> Settings
+    </div>
     <div class="admin-logout"><button onclick="adminLogout()">Sign Out</button></div>
   </aside>
 
@@ -1420,6 +1423,33 @@ footer{background:var(--card-bg);border-top:1px solid var(--border);padding:60px
         <button class="an-tab" id="an-tab-6month" onclick="renderAnalytics('6month')">6 Months</button>
       </div>
       <div id="analytics-content"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="admin-panel" id="panel-settings">
+      <div class="admin-page-title">Settings</div>
+      <div class="admin-page-sub">Manage your admin login credentials</div>
+      <div class="admin-card" style="max-width:480px">
+        <div class="admin-card-title">Change Password</div>
+        <form id="settings-pw-form" onsubmit="adminChangePassword(event)">
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px">
+            <div>
+              <div class="form-label" style="margin-bottom:6px">Current Password</div>
+              <input type="password" class="form-input" id="settings-pw-current" placeholder="Enter current password" required>
+            </div>
+            <div>
+              <div class="form-label" style="margin-bottom:6px">New Password</div>
+              <input type="password" class="form-input" id="settings-pw-new" placeholder="At least 6 characters" required>
+            </div>
+            <div>
+              <div class="form-label" style="margin-bottom:6px">Confirm New Password</div>
+              <input type="password" class="form-input" id="settings-pw-confirm" placeholder="Repeat new password" required>
+            </div>
+            <button type="submit" class="btn-primary" style="padding:12px;margin-top:4px">Update Password</button>
+            <div id="settings-pw-msg" style="display:none;font-size:.85rem;padding:10px 14px;border-radius:4px;margin-top:4px"></div>
+          </div>
+        </form>
+      </div>
     </div>
 
   </main>
@@ -2070,7 +2100,9 @@ async function submitCateringInquiry(e) {
   const subtotal = items.reduce((s,i) => s+i.price*i.qty, 0);
   const taxAmt = subtotal * 0.095;
   const total = subtotal + taxAmt;
-  const invoiceNum = 'INV' + String(Math.floor(Math.random()*900)+100);
+  const invSeq = (parseInt(localStorage.getItem('bt_inv_seq') || '999') + 1);
+  localStorage.setItem('bt_inv_seq', String(invSeq));
+  const invoiceNum = 'INV-' + String(invSeq).padStart(4, '0');
   const invoiceDate = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const itemsSummary = items.map(i => `${i.name} (${i.size}) x${i.qty} = $${(i.price*i.qty).toFixed(2)}`).join(' | ');
 
@@ -2358,9 +2390,37 @@ async function _updateNewOrdersBadge() {
 }
 
 // ==================== ADMIN AUTH ====================
+function getAdminPass() {
+  return localStorage.getItem('bt_admin_pass') || 'btadmin2024';
+}
+
+function adminChangePassword(e) {
+  e.preventDefault();
+  const current = document.getElementById('settings-pw-current').value;
+  const nw = document.getElementById('settings-pw-new').value;
+  const confirm = document.getElementById('settings-pw-confirm').value;
+  const msg = document.getElementById('settings-pw-msg');
+
+  function showMsg(text, ok) {
+    msg.textContent = text;
+    msg.style.display = 'block';
+    msg.style.background = ok ? 'rgba(76,175,80,.12)' : 'rgba(229,57,53,.12)';
+    msg.style.border = ok ? '1px solid rgba(76,175,80,.3)' : '1px solid rgba(229,57,53,.3)';
+    msg.style.color = ok ? '#81C784' : '#EF9A9A';
+  }
+
+  if (current !== getAdminPass()) { showMsg('Current password is incorrect.', false); return; }
+  if (nw.length < 6) { showMsg('New password must be at least 6 characters.', false); return; }
+  if (nw !== confirm) { showMsg('Passwords do not match.', false); return; }
+
+  localStorage.setItem('bt_admin_pass', nw);
+  document.getElementById('settings-pw-form').reset();
+  showMsg('Password updated successfully.', true);
+}
+
 function doLogin() {
   const pw = document.getElementById('admin-pw').value;
-  if (pw === 'btadmin2024') {
+  if (pw === getAdminPass()) {
     adminAuthed = true;
     lsSet('adminAuth', true);
     document.getElementById('login-error').style.display = 'none';
