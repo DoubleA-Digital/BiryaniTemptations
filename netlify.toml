@@ -1,6 +1,9 @@
 [build]
   functions = "netlify/functions"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "CLOVER_MERCHANT_ID"
+
 [[headers]]
   for = "/*"
   [headers.values]
