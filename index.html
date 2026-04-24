@@ -3852,7 +3852,7 @@ async function placeOrder() {
     const { total } = getOrderTotals();
     const amountInCents = Math.round(total * 100);
     try {
-      const chargeRes = await fetch('/.netlify/functions/clover-charge', {
+      const chargeRes = await fetch('/api/clover-charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: cardToken, amount: amountInCents, description: `Biryani Temptations - ${name}` }),
