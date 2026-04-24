@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
 
   const CLOVER_API_TOKEN = process.env.CLOVER_API_TOKEN;
   const MERCHANT_ID = process.env.CLOVER_MERCHANT_ID;
-  const CLOVER_BASE = process.env.CLOVER_BASE_URL || 'https://scl-sandbox.dev.clover.com';
+  const CLOVER_BASE = process.env.CLOVER_BASE_URL || 'https://sandbox.dev.clover.com';
 
   if (!CLOVER_API_TOKEN || !MERCHANT_ID) {
     return res.status(500).json({ error: 'Payment processor not configured.' });
