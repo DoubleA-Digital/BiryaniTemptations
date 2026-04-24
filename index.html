@@ -1305,12 +1305,24 @@ footer:hover {
       <!-- Clover Payment Fields -->
       <div id="clover-payment-section" style="margin-bottom:16px">
         <div class="form-label" style="margin-bottom:10px;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent)">Card Payment</div>
-        <div id="clover-card-number" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;margin-bottom:10px;background:rgba(255,255,255,.04)"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div id="clover-card-date" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
-          <div id="clover-card-cvv" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
+        <div class="form-group full" style="margin-bottom:10px">
+          <label class="form-label">Card Number</label>
+          <div id="clover-card-number" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
         </div>
-        <div id="clover-card-postal-code" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;margin-top:10px;background:rgba(255,255,255,.04)"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="form-group">
+            <label class="form-label">Expiry Date</label>
+            <div id="clover-card-date" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CVV</label>
+            <div id="clover-card-cvv" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">ZIP Code</label>
+          <div id="clover-card-postal-code" style="height:44px;border:1px solid var(--border2);border-radius:4px;padding:0 12px;background:rgba(255,255,255,.04)"></div>
+        </div>
         <div id="clover-payment-errors" style="color:#e53935;font-size:.82rem;margin-top:8px;min-height:18px"></div>
       </div>
 
@@ -4365,18 +4377,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.addEventListener('hashchange', handleHash);
 
 // ==================== CLOVER PAYMENTS ====================
-const CLOVER_APP_ID = 'MT1T1NS59TFVY';
-const CLOVER_MERCHANT_ID = window.__CLOVER_MID__ || '';
 let clover, cloverElements, cloverTokenReady = false;
 
 function initClover() {
   if (typeof Clover === 'undefined') return;
-  clover = new Clover(CLOVER_APP_ID, { merchantId: CLOVER_MERCHANT_ID });
+  clover = new Clover('MT1T1NS59TFVY');
   cloverElements = clover.elements();
 
   const styles = {
-    body: { fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#F5E6C8' },
+    body: { fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#F5E6C8', backgroundColor: 'transparent' },
     input: { fontSize: '15px', color: '#F5E6C8' },
+    'input::placeholder': { color: 'rgba(245,230,200,0.4)' },
   };
 
   const cardNumber = cloverElements.create('CARD_NUMBER', styles);
