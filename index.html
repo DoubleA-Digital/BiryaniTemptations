@@ -4381,7 +4381,8 @@ let clover, cloverElements, cloverTokenReady = false;
 
 function initClover() {
   if (typeof Clover === 'undefined') return;
-  clover = new Clover('MT1T1NS59TFVY');
+  const mid = atob('M1JDUktBV0hONkY0MQ==');
+  clover = new Clover('MT1T1NS59TFVY', { merchantId: mid });
   cloverElements = clover.elements();
 
   const styles = {
