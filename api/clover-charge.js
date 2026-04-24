@@ -1,9 +1,4 @@
-const JSON_HEADERS = {
-  'Content-Type': 'application/json',
-  'Cache-Control': 'no-store',
-};
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -51,7 +46,7 @@ export default async function handler(req, res) {
     });
 
     let data = {};
-    try { data = await response.json(); } catch { /* non-json response */ }
+    try { data = await response.json(); } catch {}
 
     if (!response.ok) {
       return res.status(response.status).json({
@@ -59,13 +54,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      chargeId: data.id,
-      status: data.status,
-    });
+    return res.status(200).json({ success: true, chargeId: data.id, status: data.status });
   } catch (err) {
     console.error('Clover charge error:', err && err.message);
     return res.status(500).json({ error: 'Payment server error.' });
   }
-}
+};
