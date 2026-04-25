@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
 
   const CLOVER_API_TOKEN = process.env.CLOVER_API_TOKEN;
   const MERCHANT_ID = process.env.CLOVER_MERCHANT_ID;
-  const CLOVER_BASE = process.env.CLOVER_BASE_URL || 'https://sandbox.dev.clover.com';
+  const CLOVER_BASE = process.env.CLOVER_BASE_URL || 'https://scl-sandbox.dev.clover.com';
 
   if (!CLOVER_API_TOKEN || !MERCHANT_ID) {
     return res.status(500).json({ error: 'Payment processor not configured.' });
@@ -21,14 +21,16 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid amount.' });
   }
   const cur = typeof currency === 'string' ? currency.toUpperCase().slice(0, 3) : 'USD';
-  if (!/^[A-Z]{3}$/.test(cur)) {
-    return res.status(400).json({ error: 'Invalid currency.' });
-  }
   const safeDesc = typeof description === 'string'
     ? description.replace(/[\x00-\x1F\x7F]/g, '').slice(0, 200)
     : 'Biryani Temptations Order';
 
+  console.log('Clover charge attempt:', { CLOVER_BASE, MERCHANT_ID: MERCHANT_ID.slice(0,6), amt, token: token.slice(0,10) });
+
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 9000);
+
     const response = await fetch(`${CLOVER_BASE}/v1/charges`, {
       method: 'POST',
       headers: {
@@ -43,20 +45,28 @@ module.exports = async function handler(req, res) {
         description: safeDesc,
         capture: true,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     let data = {};
     try { data = await response.json(); } catch {}
 
+    console.log('Clover response:', response.status, JSON.stringify(data));
+
     if (!response.ok) {
       return res.status(response.status).json({
         error: (data && (data.message || data.error)) || 'Payment failed.',
+        details: data,
       });
     }
 
     return res.status(200).json({ success: true, chargeId: data.id, status: data.status });
   } catch (err) {
-    console.error('Clover charge error:', err && err.message);
-    return res.status(500).json({ error: 'Payment server error.' });
+    console.error('Clover charge error:', err && err.message, err && err.name);
+    if (err && err.name === 'AbortError') {
+      return res.status(504).json({ error: 'Payment gateway timeout. Please try again.' });
+    }
+    return res.status(500).json({ error: 'Payment server error: ' + (err && err.message) });
   }
 };
