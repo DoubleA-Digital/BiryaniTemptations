@@ -4142,9 +4142,19 @@ async function doSignIn() {
     errEl.style.display = 'block';
     return;
   }
-  // Immediately load profile and update nav — don't wait for onAuthStateChange
-  if (data && data.user) await loadUserProfile(data.user);
-  closeAuthModal();
+  // Immediately show logged-in state in nav, then load full profile
+  if (data && data.user) {
+    const signinBtn = document.getElementById('nav-signin-btn');
+    const userBtn = document.getElementById('nav-user-btn');
+    const nameEl = document.getElementById('nav-user-name');
+    if (signinBtn) signinBtn.style.display = 'none';
+    if (nameEl) nameEl.textContent = email.split('@')[0];
+    if (userBtn) userBtn.style.display = 'flex';
+    closeAuthModal();
+    await loadUserProfile(data.user);
+  } else {
+    closeAuthModal();
+  }
 }
 
 async function resendConfirmation(email) {
