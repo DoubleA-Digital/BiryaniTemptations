@@ -4142,16 +4142,12 @@ async function doSignIn() {
     errEl.style.display = 'block';
     return;
   }
-  // Immediately show logged-in state in nav, then load full profile
+  // Set currentUser immediately so profile page works right away
   if (data && data.user) {
-    const signinBtn = document.getElementById('nav-signin-btn');
-    const userBtn = document.getElementById('nav-user-btn');
-    const nameEl = document.getElementById('nav-user-name');
-    if (signinBtn) signinBtn.style.display = 'none';
-    if (nameEl) nameEl.textContent = email.split('@')[0];
-    if (userBtn) userBtn.style.display = 'flex';
+    currentUser = { id: data.user.id, email: data.user.email, name: email.split('@')[0], phone: '', points: 0 };
+    updateNavUser();
     closeAuthModal();
-    await loadUserProfile(data.user);
+    await loadUserProfile(data.user); // replaces with full name + points from Supabase
   } else {
     closeAuthModal();
   }
