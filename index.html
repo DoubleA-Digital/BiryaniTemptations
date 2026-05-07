@@ -876,6 +876,14 @@ footer:hover { box-shadow: 0 -4px 48px rgba(232,112,0,.07); }
 .clover-pay-footer { display: flex; align-items: center; gap: 9px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(248,237,216,.1); font-size: .74rem; opacity: .7; color: var(--cream); }
 .clover-pay-footer .clover-lock { color: var(--gold); }
 @media (max-width: 520px) { .clover-field-row { grid-template-columns: 1fr 1fr; } .clover-field-row .clover-field-group:last-child { grid-column: 1 / -1; } }
+
+/* Hide Clover SDK's auto-injected branding footer */
+body > div[id*="clover"]:not(.clover-pay-section),
+body > iframe[src*="clover"],
+body > div[class*="clover-footer"],
+body > [data-testid*="clover"],
+iframe[title*="Clover"],
+iframe[src*="clover.com"]:not(#clover-card-number iframe):not(#clover-card-date iframe):not(#clover-card-cvv iframe):not(#clover-card-postal-code iframe) { display: none !important; }
 @media (max-width: 768px) { #cart-drawer { width: 100vw; } .checkout-modal { padding: 28px 18px; max-height: 96vh; } }
 
 /* ════════════════════════════════════════
