@@ -4129,7 +4129,7 @@ async function doSignIn() {
   if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
   btn.textContent = 'Signing in…'; btn.disabled = true;
 
-  const { error } = await _supa.auth.signInWithPassword({ email, password });
+  const { data, error } = await _supa.auth.signInWithPassword({ email, password });
   btn.textContent = 'Sign In'; btn.disabled = false;
   if (error) {
     if (error.message.toLowerCase().includes('confirm') || error.message.toLowerCase().includes('not confirmed')) {
@@ -4142,6 +4142,8 @@ async function doSignIn() {
     errEl.style.display = 'block';
     return;
   }
+  // Immediately load profile and update nav — don't wait for onAuthStateChange
+  if (data && data.user) await loadUserProfile(data.user);
   closeAuthModal();
 }
 
