@@ -663,6 +663,9 @@ img { max-width: 100%; display: block; }
 .catering-menu-note { font-family: var(--font-sub); font-style: italic; color: var(--cream); opacity: .65; text-align: center; margin-bottom: 36px; font-size: .95rem; }
 .cat-category { margin-bottom: 40px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
 .cat-category-header { background: var(--saffron); color: #fff; font-family: var(--font-body); font-size: .88rem; font-weight: 700; letter-spacing: 2px; padding: 11px 18px; text-transform: uppercase; }
+.cat-size-header-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: rgba(232,112,0,.08); border-top: 1px solid var(--border2); }
+.cat-size-header-labels { display: flex; gap: 6px; align-items: center; }
+.cat-size-header-labels span { font-family: var(--font-body); font-size: .72rem; font-weight: 700; letter-spacing: 2px; color: var(--saffron); text-transform: uppercase; min-width: 64px; text-align: center; }
 .cat-item-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-top: 1px solid var(--border); background: var(--card-bg); gap: 14px; transition: background .15s; }
 .cat-item-row:hover { background: var(--card-bg2); }
 .cat-item-name { font-family: var(--font-sub); font-size: .9rem; color: var(--cream); flex: 1; min-width: 0; padding-right: 8px; }
@@ -1296,29 +1299,6 @@ footer:hover { box-shadow: 0 -4px 48px rgba(232,112,0,.07); }
       <button type="button" class="btn-primary" onclick="navigateTo('menu')" style="padding:15px 36px">Explore Full Menu</button>
       <button type="button" class="btn-outline" onclick="navigateTo('about')" style="padding:14px 34px">Our Story</button>
     </div>
-  </div>
-  <div style="background:linear-gradient(160deg,var(--bg3) 0%,var(--card-bg) 60%,var(--bg2) 100%);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:80px 28px;text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(139,26,26,.12) 0%,transparent 60%);pointer-events:none"></div>
-    <div class="section-label">Catering Services</div>
-    <h2 class="section-title" style="font-size:clamp(2rem,5vw,3.2rem)">Feed Your Crowd</h2>
-    <div class="divider" style="margin:0 auto 24px"></div>
-    <p style="font-family:var(--font-sub);font-size:1.1rem;opacity:.72;max-width:550px;margin:0 auto 40px">From intimate gatherings of 15 to grand celebrations of 200+, our tray service brings the full Biryani Temptations experience to your event.</p>
-    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
-      <div style="background:var(--bg);border:1px solid var(--border2);padding:24px 36px;border-radius:6px;text-align:center;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
-        <div style="font-family:var(--font-display);font-size:2.5rem;color:var(--accent);text-shadow:0 4px 16px rgba(232,112,0,.4)">S</div>
-        <div style="font-size:.85rem;opacity:.7;margin-top:6px">15–20 guests</div>
-      </div>
-      <div style="background:linear-gradient(145deg,rgba(232,112,0,.15),rgba(232,112,0,.05));border:1px solid var(--accent);padding:24px 36px;border-radius:6px;text-align:center;box-shadow:0 4px 24px rgba(232,112,0,.2)">
-        <div style="font-family:var(--font-display);font-size:2.5rem;color:var(--accent);text-shadow:0 4px 16px rgba(232,112,0,.5)">M</div>
-        <div style="font-size:.85rem;opacity:.7;margin-top:6px">25–35 guests</div>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border2);padding:24px 36px;border-radius:6px;text-align:center;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
-        <div style="font-family:var(--font-display);font-size:2.5rem;color:var(--accent);text-shadow:0 4px 16px rgba(232,112,0,.4)">L</div>
-        <div style="font-size:.85rem;opacity:.7;margin-top:6px">50–70 guests</div>
-      </div>
-    </div>
-    <br><br>
-    <button type="button" class="btn-outline" onclick="navigateTo('catering')">Plan Your Event</button>
   </div>
   <footer>
     <div class="footer-inner">
@@ -2076,88 +2056,92 @@ footer:hover { box-shadow: 0 -4px 48px rgba(232,112,0,.07); }
 const DEFAULT_MENU = {
   appetizers: {
     veg: [
-      { id: 'a1', image: 'images/gobi-65.jpg', name: 'Gobi 65', emoji: '🥦', desc: 'Crispy cauliflower tossed in bold spices', price: 15.99, spice: true },
-      { id: 'a2', image: 'images/chilli-gobi-65.jpg', name: 'Chilli Gobi 65', emoji: '🌶️', desc: 'Indo-Chinese spicy cauliflower', price: 15.99, spice: true },
-      { id: 'a3', name: 'Paneer 65', emoji: '🧀', desc: 'Crispy fried paneer with signature spices', price: 16.99, spice: true },
-      { id: 'a4', image: 'images/chilli-paneer.jpg', name: 'Chilli Paneer', emoji: '🌶️', desc: 'Indo-Chinese style spicy paneer', price: 16.99, spice: true },
-      { id: 'a5', image: 'images/paneer-tikka.jpg', name: 'Paneer Tikka', emoji: '🍢', desc: 'Grilled marinated paneer skewers', price: 16.99 },
-      { id: 'a6', image: 'images/hariyali-paneer-tikka.jpg', name: 'Hariyali Paneer Tikka', emoji: '🌿', desc: 'Green herb marinated paneer tikka', price: 16.99 },
-      { id: 'a7', name: 'Cut Mirchi', emoji: '🌶️', desc: 'Fried slit green chillies with masala', price: 12.99, spice: true },
-      { id: 'a8', name: 'Mirchi Bajji', emoji: '🌶️', desc: 'Battered fried green chillies', price: 12.99 },
-      { id: 'a9', name: 'Onion Pakora', emoji: '🧅', desc: 'Crispy fried onion fritters', price: 13.99 },
-      { id: 'a10', name: 'BT Gobi Fry', emoji: '🥦', desc: 'Signature crispy cauliflower fry', price: 15.99, spice: true }
+      { id: 'a3', name: 'Paneer 65', emoji: '🧀', desc: 'Crispy fried paneer with signature spices', price: 18.99, spice: true },
+      { id: 'a4', image: 'images/chilli-paneer.jpg', name: 'Chilli Paneer', emoji: '🌶️', desc: 'Indo-Chinese style spicy paneer', price: 18.99, spice: true },
+      { id: 'a27', name: 'Jalapeno Paneer', emoji: '🫑', desc: 'Paneer with fresh jalapeno heat', price: 18.99, spice: true },
+      { id: 'a1', image: 'images/gobi-65.jpg', name: 'Gobi 65', emoji: '🥦', desc: 'Crispy cauliflower tossed in bold spices', price: 17.99, spice: true },
+      { id: 'a2', image: 'images/chilli-gobi-65.jpg', name: 'Chilli Gobi 65', emoji: '🌶️', desc: 'Indo-Chinese spicy cauliflower', price: 17.99, spice: true },
+      { id: 'a5', image: 'images/paneer-tikka.jpg', name: 'Paneer Tikka', emoji: '🍢', desc: 'Grilled marinated paneer skewers', price: 18.99 },
+      { id: 'a6', image: 'images/hariyali-paneer-tikka.jpg', name: 'Hariyali Paneer Tikka', emoji: '🌿', desc: 'Green herb marinated paneer tikka', price: 18.99 },
+      { id: 'a7', name: 'Cut Mirchi', emoji: '🌶️', desc: 'Fried slit green chillies with masala', price: 14.99, spice: true },
+      { id: 'a8', name: 'Mirchi Bajji', emoji: '🌶️', desc: 'Battered fried green chillies', price: 14.99 },
+      { id: 'a9', name: 'Onion Pakora', emoji: '🧅', desc: 'Crispy fried onion fritters', price: 15.99 },
+      { id: 'a10', name: 'BT Gobi Fry', emoji: '🥦', desc: 'Signature crispy cauliflower fry', price: 17.99, spice: true },
+      { id: 'a28', badge: 'new', name: 'Onion Samosa', emoji: '🥟', desc: 'Crispy pastry filled with spiced onion', price: 8.99 }
     ],
     nonVeg: [
-      { id: 'a11', badge: 'popular', image: 'images/bt-chicken-fry.jpg', name: 'BT Chicken Fry', emoji: '🍗', desc: 'Signature crispy chicken fry', price: 17.99, spice: true },
-      { id: 'a12', badge: 'popular', image: 'images/chicken-65.jpg', name: 'Chicken 65', emoji: '🍗', desc: 'Classic spicy fried chicken', price: 17.99, spice: true },
-      { id: 'a13', image: 'images/chilli-chicken.jpg', name: 'Chilli Chicken', emoji: '🌶️', desc: 'Indo-Chinese spicy chicken', price: 17.99, spice: true },
-      { id: 'a14', name: 'Chicken Lollipop', emoji: '🍗', desc: 'French-cut chicken wings', price: 17.99 },
-      { id: 'a15', name: 'BT Tandoori Chicken', emoji: '🍗', desc: 'Classic tandoor-roasted chicken', price: 17.99 },
-      { id: 'a16', name: 'BT Tandoori Chicken Spicy', emoji: '🌶️', desc: 'Extra spicy tandoori chicken', price: 17.99 },
-      { id: 'a17', image: 'images/bt-goat-sukka-fry.jpg', name: 'BT Goat Sukka Fry', emoji: '🐐', desc: 'Dry-spiced signature goat fry', price: 17.99, spice: true },
-      { id: 'a18', badge: 'new', name: 'BT Shrimp Apollo', emoji: '🍤', desc: 'Signature crispy shrimp Apollo', price: 18.99 },
-      { id: 'a19', image: 'images/chicken-tikka.jpg', name: 'Chicken Tikka', emoji: '🍢', desc: 'Marinated grilled chicken cubes', price: 17.99 },
-      { id: 'a20', image: 'images/chicken-hariyali-kabob.jpg', name: 'Chicken Hariyali Kabob', emoji: '🌿', desc: 'Green herb marinated chicken kabob', price: 17.99 },
-      { id: 'a21', badge: 'new', name: 'BT Fish Apollo', emoji: '🐟', desc: 'Signature crispy fish Apollo', price: 18.99 },
-      { id: 'a22', image: 'images/malai-kabob.jpg', name: 'Malai Kabob', emoji: '🍢', desc: 'Creamy soft chicken kabob', price: 17.99 },
-      { id: 'a23', name: 'Kabob Platter', emoji: '🍽️', desc: 'Assorted kabob selection platter', price: 18.99 },
-      { id: 'a24', name: 'Jalapeno Chicken', emoji: '🫑', desc: 'Chicken with jalapeno stuffing', price: 17.99 },
-      { id: 'a25', name: 'Chicken Seekh Kabob', emoji: '🍢', desc: 'Grilled minced chicken kabob', price: 17.99 },
-      { id: 'a26', name: 'Chicken Pepper Fry', emoji: '🌑', desc: 'Bold black pepper chicken fry', price: 17.99, spice: true }
+      { id: 'a11', badge: 'popular', image: 'images/bt-chicken-fry.jpg', name: 'BT Chicken Fry', emoji: '🍗', desc: 'Signature crispy chicken fry', price: 19.99, spice: true },
+      { id: 'a12', badge: 'popular', image: 'images/chicken-65.jpg', name: 'Chicken 65', emoji: '🍗', desc: 'Classic spicy fried chicken', price: 19.99, spice: true },
+      { id: 'a13', image: 'images/chilli-chicken.jpg', name: 'Chilli Chicken', emoji: '🌶️', desc: 'Indo-Chinese spicy chicken', price: 19.99, spice: true },
+      { id: 'a14', name: 'Chicken Lollipop', emoji: '🍗', desc: 'French-cut chicken wings', price: 19.99 },
+      { id: 'a15', name: 'BT Tandoori Chicken', emoji: '🍗', desc: 'Classic tandoor-roasted chicken', price: 19.99 },
+      { id: 'a16', name: 'BT Tandoori Chicken Spicy', emoji: '🌶️', desc: 'Extra spicy tandoori chicken', price: 19.99 },
+      { id: 'a17', image: 'images/bt-goat-sukka-fry.jpg', name: 'BT Goat Sukka Fry', emoji: '🐐', desc: 'Dry-spiced signature goat fry', price: 20.99, spice: true },
+      { id: 'a18', badge: 'new', name: 'BT Shrimp Apollo', emoji: '🍤', desc: 'Signature crispy shrimp Apollo', price: 20.99 },
+      { id: 'a19', image: 'images/chicken-tikka.jpg', name: 'Chicken Tikka', emoji: '🍢', desc: 'Marinated grilled chicken cubes', price: 19.99 },
+      { id: 'a20', image: 'images/chicken-hariyali-kabob.jpg', name: 'Chicken Hariyali Kabob', emoji: '🌿', desc: 'Green herb marinated chicken kabob', price: 19.99 },
+      { id: 'a21', badge: 'new', name: 'BT Fish Apollo', emoji: '🐟', desc: 'Signature crispy fish Apollo', price: 20.99 },
+      { id: 'a22', image: 'images/malai-kabob.jpg', name: 'Malai Kabob', emoji: '🍢', desc: 'Creamy soft chicken kabob', price: 19.99 },
+      { id: 'a23', name: 'Kabob Platter', emoji: '🍽️', desc: 'Assorted kabob selection platter', price: 19.99 },
+      { id: 'a24', name: 'Jalapeno Chicken', emoji: '🫑', desc: 'Chicken with jalapeno stuffing', price: 19.99 },
+      { id: 'a25', name: 'Chicken Seekh Kabob', emoji: '🍢', desc: 'Grilled minced chicken kabob', price: 19.99 },
+      { id: 'a26', name: 'Chicken Pepper Fry', emoji: '🌑', desc: 'Bold black pepper chicken fry', price: 19.99, spice: true }
     ]
   },
   biryanis: {
     veg: [
-      { id: 'b1', image: 'images/mix-veggie-biryani.jpg', name: 'Mix Veggie Dum Biryani', emoji: '🥘', desc: 'Fragrant basmati with mixed vegetables', price: 15.99, spice: true },
-      { id: 'b2', name: 'BT Paneer Biryani', emoji: '🧀', desc: 'Signature paneer dum biryani', price: 16.99, spice: true }
+      { id: 'b1', image: 'images/mix-veggie-biryani.jpg', name: 'Mix Veggie Dum Biryani', emoji: '🥘', desc: 'Fragrant basmati with mixed vegetables', price: 17.99, spice: true },
+      { id: 'b2', name: 'BT Paneer Biryani', emoji: '🧀', desc: 'Signature paneer dum biryani', price: 18.99, spice: true },
+      { id: 'b12', badge: 'new', name: 'Vankaya (Eggplant) Biryani', emoji: '🍆', desc: 'Hyderabadi eggplant dum biryani', price: 17.99, spice: true }
     ],
     nonVeg: [
-      { id: 'b3', name: 'Egg Dum Biryani', emoji: '🥚', desc: 'Slow-cooked egg dum biryani', price: 17.99, spice: true },
-      { id: 'b4', badge: 'popular', image: 'images/chicken-dum-biryani.jpg', name: 'BT Chicken Dum Biryani', emoji: '🍗', desc: 'Signature slow-cooked chicken biryani', price: 17.99, spice: true },
-      { id: 'b5', name: 'Boneless Chicken Biryani', emoji: '🍗', desc: 'Tender boneless chicken biryani', price: 17.99, spice: true },
-      { id: 'b6', name: 'BT Chicken Fry Biryani', emoji: '🍗', desc: 'Biryani with crispy fried chicken', price: 17.99, spice: true },
-      { id: 'b7', badge: 'popular', image: 'images/natu-kodi-biryani.jpg', name: 'BT Natu Kodi Dum Biryani', emoji: '🐓', desc: 'Country chicken dum biryani', price: 18.99, spice: true },
-      { id: 'b8', badge: 'popular', image: 'images/mutton-biryani.jpg', name: 'BT Goat Dum Biryani', emoji: '🐐', desc: 'Rich slow-cooked goat dum biryani', price: 18.99, spice: true },
-      { id: 'b9', name: 'BT Shrimp Dum Biryani', emoji: '🍤', desc: 'Aromatic shrimp dum biryani', price: 18.99, spice: true },
-      { id: 'b10', badge: 'new', name: 'BT Fish Biryani', emoji: '🐟', desc: 'Signature fish biryani', price: 18.99, spice: true },
-      { id: 'b11', name: 'Keema Biryani', emoji: '🥩', desc: 'Spiced minced meat biryani', price: 18.99, spice: true }
+      { id: 'b3', name: 'Egg Dum Biryani', emoji: '🥚', desc: 'Slow-cooked egg dum biryani', price: 18.99, spice: true },
+      { id: 'b4', badge: 'popular', image: 'images/chicken-dum-biryani.jpg', name: 'BT Chicken Dum Biryani', emoji: '🍗', desc: 'Signature slow-cooked chicken biryani', price: 19.99, spice: true },
+      { id: 'b5', name: 'Boneless Chicken Biryani', emoji: '🍗', desc: 'Tender boneless chicken biryani', price: 19.99, spice: true },
+      { id: 'b6', name: 'BT Chicken Fry Biryani', emoji: '🍗', desc: 'Biryani with crispy fried chicken', price: 19.99, spice: true },
+      { id: 'b13', badge: 'new', name: 'BT Special Chicken Biryani', emoji: '⭐', desc: 'Our signature special chicken biryani', price: 19.99, spice: true },
+      { id: 'b7', badge: 'popular', image: 'images/natu-kodi-biryani.jpg', name: 'BT Natu Kodi Dum Biryani', emoji: '🐓', desc: 'Country chicken dum biryani', price: 20.99, spice: true },
+      { id: 'b8', badge: 'popular', image: 'images/mutton-biryani.jpg', name: 'BT Goat Dum Biryani', emoji: '🐐', desc: 'Rich slow-cooked goat dum biryani', price: 20.99, spice: true },
+      { id: 'b9', name: 'BT Shrimp Dum Biryani', emoji: '🍤', desc: 'Aromatic shrimp dum biryani', price: 20.99, spice: true },
+      { id: 'b10', badge: 'new', name: 'BT Fish Biryani', emoji: '🐟', desc: 'Signature fish biryani', price: 20.99, spice: true },
+      { id: 'b11', name: 'Keema Biryani', emoji: '🥩', desc: 'Spiced minced meat biryani', price: 20.99, spice: true }
     ]
   },
   curries: {
     veg: [
-      { id: 'c1', name: 'Mirchi Ka Saalan', emoji: '🌶️', desc: 'Hyderabadi green chilli curry', price: 14.99, spice: true },
-      { id: 'c2', name: 'Bhindi Masala', emoji: '🥬', desc: 'Okra in spiced masala', price: 15.99, spice: true },
-      { id: 'c3', name: 'Channa Masala', emoji: '🫘', desc: 'Spiced chickpea curry', price: 14.99, spice: true },
+      { id: 'c1', name: 'Mirchi Ka Saalan', emoji: '🌶️', desc: 'Hyderabadi green chilli curry', price: 17.99, spice: true },
+      { id: 'c2', name: 'Bhindi Masala', emoji: '🥬', desc: 'Okra in spiced masala', price: 18.50, spice: true },
+      { id: 'c3', name: 'Channa Masala', emoji: '🫘', desc: 'Spiced chickpea curry', price: 17.99, spice: true },
       { id: 'c4', name: 'Rasam', emoji: '🍵', desc: 'Tangy pepper tamarind soup', price: 12.99 },
-      { id: 'c5', name: 'Dal Tadka', emoji: '🫘', desc: 'Tempered yellow lentils', price: 12.99 },
-      { id: 'c6', name: 'Tomato Curry', emoji: '🍅', desc: 'Tangy spiced tomato curry', price: 14.99, spice: true },
-      { id: 'c7', image: 'images/paneer-tikka-masala.jpg', name: 'Paneer Tikka Masala', emoji: '🧀', desc: 'Grilled paneer in creamy tomato sauce', price: 15.99, spice: true },
-      { id: 'c8', name: 'Mixed Vegetable Curry', emoji: '🥗', desc: 'Seasonal vegetables in rich gravy', price: 14.99, spice: true },
-      { id: 'c9', name: 'Bagara Baingan', emoji: '🍆', desc: 'Hyderabadi eggplant in tamarind gravy', price: 14.99, spice: true },
-      { id: 'c10', name: 'Bhindi Fry', emoji: '🥬', desc: 'Crispy stir-fried okra', price: 15.99 },
-      { id: 'c11', name: 'Palak Paneer', emoji: '🌿', desc: 'Paneer in creamy spinach gravy', price: 15.99, spice: true }
+      { id: 'c5', name: 'Dal Tadka', emoji: '🫘', desc: 'Tempered yellow lentils', price: 16.99 },
+      { id: 'c7', image: 'images/paneer-tikka-masala.jpg', name: 'Paneer Tikka Masala', emoji: '🧀', desc: 'Grilled paneer in creamy tomato sauce', price: 18.99, spice: true },
+      { id: 'c8', name: 'Mixed Vegetable Curry', emoji: '🥗', desc: 'Seasonal vegetables in rich gravy', price: 17.99, spice: true },
+      { id: 'c9', name: 'Bagara Baingan', emoji: '🍆', desc: 'Hyderabadi eggplant in tamarind gravy', price: 18.50, spice: true },
+      { id: 'c11', name: 'Palak Paneer', emoji: '🌿', desc: 'Paneer in creamy spinach gravy', price: 18.99, spice: true },
+      { id: 'c25', badge: 'new', name: 'Paneer Butter Masala', emoji: '🧀', desc: 'Paneer in rich buttery tomato gravy', price: 18.99 },
+      { id: 'c26', badge: 'new', name: 'Saag Paneer', emoji: '🌿', desc: 'Paneer in spiced mustard greens', price: 18.99, spice: true }
     ],
     nonVeg: [
-      { id: 'c12', name: 'BT Chicken Curry', emoji: '🍗', desc: 'Signature slow-cooked chicken curry', price: 16.99, spice: true },
-      { id: 'c13', badge: 'popular', image: 'images/butter-chicken.jpg', name: 'Butter Chicken', emoji: '🧈', desc: 'Creamy tomato butter chicken', price: 16.99 },
-      { id: 'c14', badge: 'popular', image: 'images/chicken-tikka-masala.jpg', name: 'Chicken Tikka Masala', emoji: '🍗', desc: 'Grilled chicken in masala sauce', price: 16.99, spice: true },
-      { id: 'c15', name: 'Kara-hi Chicken', emoji: '🥘', desc: 'Wok-cooked spiced chicken', price: 16.99, spice: true },
-      { id: 'c16', name: 'BT Mutton Curry', emoji: '🐑', desc: 'Rich slow-cooked mutton curry', price: 18.99, spice: true },
-      { id: 'c17', name: 'Dum Ka Ghosh', emoji: '🥩', desc: 'Hyderabadi slow-cooked meat', price: 18.99, spice: true },
-      { id: 'c18', name: 'BT Fish Curry', emoji: '🐟', desc: 'Coastal spiced fish curry', price: 18.99, spice: true },
-      { id: 'c19', name: 'BT Shrimp Curry', emoji: '🍤', desc: 'Spiced shrimp in rich gravy', price: 18.99, spice: true },
-      { id: 'c20', name: 'Keema Curry', emoji: '🥩', desc: 'Spiced minced meat curry', price: 18.99, spice: true },
-      { id: 'c21', name: 'Egg Masala', emoji: '🥚', desc: 'Boiled eggs in spiced masala', price: 16.99, spice: true },
-      { id: 'c22', name: 'Egg Burji', emoji: '🍳', desc: 'Spiced scrambled eggs', price: 16.99, spice: true },
-      { id: 'c23', name: 'Dum-Ka-Murg', emoji: '🍗', desc: 'Hyderabadi slow-cooked chicken', price: 16.99, spice: true },
-      { id: 'c24', name: 'Natu Kodi Country Chicken Curry', emoji: '🐓', desc: 'Country chicken in rich masala', price: 17.99, spice: true }
+      { id: 'c12', name: 'BT Chicken Curry', emoji: '🍗', desc: 'Signature slow-cooked chicken curry', price: 19.99, spice: true },
+      { id: 'c13', badge: 'popular', image: 'images/butter-chicken.jpg', name: 'Butter Chicken', emoji: '🧈', desc: 'Creamy tomato butter chicken', price: 19.99 },
+      { id: 'c14', badge: 'popular', image: 'images/chicken-tikka-masala.jpg', name: 'Chicken Tikka Masala', emoji: '🍗', desc: 'Grilled chicken in masala sauce', price: 19.99, spice: true },
+      { id: 'c15', name: 'Kara-hi Chicken', emoji: '🥘', desc: 'Wok-cooked spiced chicken', price: 19.99, spice: true },
+      { id: 'c16', name: 'BT Mutton Curry', emoji: '🐑', desc: 'Rich slow-cooked mutton curry', price: 20.99, spice: true },
+      { id: 'c17', name: 'Dum Ka Ghosh', emoji: '🥩', desc: 'Hyderabadi slow-cooked meat', price: 20.99, spice: true },
+      { id: 'c18', name: 'BT Fish Curry', emoji: '🐟', desc: 'Coastal spiced fish curry', price: 20.99, spice: true },
+      { id: 'c19', name: 'BT Shrimp Curry', emoji: '🍤', desc: 'Spiced shrimp in rich gravy', price: 20.99, spice: true },
+      { id: 'c20', name: 'Keema Curry', emoji: '🥩', desc: 'Spiced minced meat curry', price: 20.99, spice: true },
+      { id: 'c21', name: 'Egg Masala', emoji: '🥚', desc: 'Boiled eggs in spiced masala', price: 18.99, spice: true },
+      { id: 'c22', name: 'Egg Burji', emoji: '🍳', desc: 'Spiced scrambled eggs', price: 18.99, spice: true },
+      { id: 'c23', name: 'Dum-Ka-Murg', emoji: '🍗', desc: 'Hyderabadi slow-cooked chicken', price: 19.99, spice: true },
+      { id: 'c24', name: 'Natu Kodi Country Chicken Curry', emoji: '🐓', desc: 'Country chicken in rich masala', price: 20.99, spice: true }
     ]
   },
   rice: {
     veg: [
       { id: 'r1', name: 'Vegetable Fried Rice', emoji: '🍚', desc: 'Wok-fried basmati with vegetables', price: 15.99, spice: true },
-      { id: 'r2', name: 'Schezwan Veg Fried Rice', emoji: '🔥', desc: 'Spicy Schezwan vegetable rice', price: 15.99, spice: true },
-      { id: 'r3', badge: 'new', image: 'images/schezwan-veg-noodles.jpg', name: 'Schezwan Veg Noodles', emoji: '🔥', desc: 'Spicy Schezwan vegetable noodles', price: 15.99, spice: true }
+      { id: 'r2', name: 'Veg Noodles', emoji: '🍜', desc: 'Stir-fried noodles with vegetables', price: 15.99, spice: true },
+      { id: 'r9', badge: 'new', name: 'Muddapappu Avakaya Rice', emoji: '🥭', desc: 'Andhra-style lentil mango pickle rice', price: 15.99 }
     ],
     nonVeg: [
       { id: 'r4', name: 'Egg Fried Rice', emoji: '🍳', desc: 'Wok-fried rice with eggs', price: 16.99, spice: true },
@@ -2246,9 +2230,9 @@ const _supa = supabase.createClient(
 
 function loadData() {
   // Reset menu if version changed
-  if (ls('menuVersion', 1) < 4) {
+  if (ls('menuVersion', 1) < 5) {
     lsSet('menuData', DEFAULT_MENU);
-    lsSet('menuVersion', 4);
+    lsSet('menuVersion', 5);
   }
   menuData = ls('menuData', DEFAULT_MENU);
   hoursData = ls('hours', DEFAULT_HOURS);
@@ -2483,66 +2467,67 @@ let cateringCart = {};
 
 const CATERING_MENU = [
   { cat: 'Appetizers (Veg)', items: [
-    {id:'av01',name:'Gobi 65',s:70,m:90,l:125},
-    {id:'av02',name:'Chilli Gobi 65',s:70,m:90,l:125},
-    {id:'av03',name:'Paneer 65',s:80,m:100,l:145},
-    {id:'av04',name:'Chilli Paneer',s:80,m:100,l:145},
-    {id:'av05',name:'Paneer Tikka',s:80,m:100,l:145},
-    {id:'av06',name:'Hariyali Paneer Tikka',s:80,m:100,l:145},
-    {id:'av07',name:'Cut Mirchi',s:70,m:90,l:125},
-    {id:'av08',name:'Mirchi Bajji',s:70,m:90,l:125},
-    {id:'av09',name:'Onion Pakora',s:70,m:90,l:125},
-    {id:'av10',name:'BT Gobi Fry',s:70,m:90,l:125}
+    {id:'av01',name:'Paneer 65',s:85,m:105,l:150},
+    {id:'av04',name:'Chilli Paneer',s:85,m:105,l:150},
+    {id:'av11',name:'Jalapeno Paneer',s:85,m:105,l:150},
+    {id:'av02',name:'Gobi 65',s:75,m:95,l:130},
+    {id:'av12',name:'Chilli Gobi 65',s:75,m:95,l:130},
+    {id:'av05',name:'Paneer Tikka',s:85,m:105,l:150},
+    {id:'av06',name:'Hariyali Paneer Tikka',s:85,m:105,l:150},
+    {id:'av07',name:'Cut Mirchi',s:75,m:95,l:130},
+    {id:'av08',name:'Mirchi Bajji',s:75,m:95,l:130},
+    {id:'av09',name:'Onion Pakora',s:75,m:95,l:130},
+    {id:'av10',name:'BT Gobi Fry',s:75,m:95,l:130}
   ]},
   { cat: 'Appetizers (Non-Veg)', items: [
-    {id:'an01',name:'Chicken Lollipop (30/50/80)',s:90,m:130,l:180},
-    {id:'an02',name:'BT Tandoori Fish (5/10/15)',s:100,m:150,l:200},
-    {id:'an03',name:'BT Chicken Fry',s:90,m:120,l:160},
-    {id:'an04',name:'Chicken 65',s:90,m:120,l:160},
-    {id:'an05',name:'Chilli Chicken',s:90,m:120,l:160},
-    {id:'an06',name:'BT Tandoori Chicken',s:90,m:120,l:160},
-    {id:'an07',name:'BT Tandoori Chicken Spicy',s:90,m:120,l:160},
-    {id:'an08',name:'Chicken Tikka',s:90,m:120,l:160},
-    {id:'an09',name:'Chicken Hariyali Kabob',s:90,m:120,l:160},
-    {id:'an10',name:'Chicken Seekh Kabob',s:90,m:120,l:160},
-    {id:'an11',name:'BT Shrimp Apollo',s:100,m:150,l:200},
+    {id:'an03',name:'BT Chicken Fry',s:90,m:130,l:180},
+    {id:'an04',name:'Chicken 65',s:90,m:130,l:180},
+    {id:'an05',name:'Chilli Chicken',s:90,m:130,l:180},
+    {id:'an01',name:'Chicken Lollipop (30/50/80)',s:90,m:130,l:200},
     {id:'an12',name:'Jalapeno Chicken',s:90,m:130,l:180},
-    {id:'an13',name:'BT Goat Sukka/Fry',s:110,m:180,l:240},
-    {id:'an14',name:'Chicken Pepper Fry',s:100,m:140,l:200},
-    {id:'an15',name:'Shrimp Pepper Fry',s:100,m:150,l:200},
-    {id:'an16',name:'BT Fish Apollo',s:90,m:130,l:180},
-    {id:'an17',name:'Malai Kabob',s:90,m:120,l:160},
-    {id:'an18',name:'Kabob Platter',s:90,m:120,l:160}
+    {id:'an14',name:'Chicken Pepper Fry',s:90,m:130,l:180},
+    {id:'an13',name:'BT Goat Sukka Fry',s:100,m:150,l:200},
+    {id:'an11',name:'BT Shrimp Apollo',s:100,m:150,l:200},
+    {id:'an06',name:'BT Tandoori Chicken',s:90,m:130,l:180},
+    {id:'an07',name:'BT Tandoori Chicken Spicy',s:90,m:130,l:180},
+    {id:'an08',name:'Chicken Tikka',s:90,m:130,l:180},
+    {id:'an09',name:'Chicken Hariyali Kabob',s:90,m:130,l:180},
+    {id:'an16',name:'BT Fish Apollo',s:100,m:140,l:180},
+    {id:'an17',name:'Malai Kabob',s:90,m:130,l:180},
+    {id:'an18',name:'Kabob Platter',s:90,m:130,l:180}
   ]},
   { cat: "Biryani's (Veg)", items: [
-    {id:'bv01',name:'Mix Veg Dum Biryani',s:70,m:90,l:125},
-    {id:'bv02',name:'BT Paneer Biryani',s:80,m:110,l:150}
+    {id:'bv01',name:'Mix Veggie Dum Biryani',s:75,m:95,l:125},
+    {id:'bv02',name:'BT Paneer Biryani',s:80,m:110,l:150},
+    {id:'bv03',name:'Vankaya (Eggplant) Biryani',s:75,m:95,l:125}
   ]},
   { cat: "Biryani's (Non-Veg)", items: [
-    {id:'bn01',name:'Egg Dum Biryani',s:70,m:90,l:125},
-    {id:'bn02',name:'BT Chicken Dum Biryani',s:90,m:120,l:160},
-    {id:'bn03',name:'Boneless Chicken Biryani',s:90,m:120,l:160},
-    {id:'bn04',name:'BT Chicken Fry Biryani',s:90,m:120,l:160},
-    {id:'bn05',name:'BT Shrimp Dum Biryani',s:100,m:150,l:200},
+    {id:'bn01',name:'Egg Dum Biryani',s:75,m:95,l:130},
+    {id:'bn02',name:'BT Chicken Dum Biryani',s:95,m:125,l:165},
+    {id:'bn03',name:'Boneless Chicken Biryani',s:95,m:125,l:165},
+    {id:'bn04',name:'BT Chicken Fry Biryani',s:95,m:125,l:165},
+    {id:'bn10',name:'BT Special Chicken Biryani',s:95,m:125,l:165},
     {id:'bn06',name:'BT Goat Dum Biryani',s:100,m:150,l:200},
+    {id:'bn05',name:'BT Shrimp Dum Biryani',s:100,m:150,l:200},
     {id:'bn07',name:'BT Natu Kodi Dum Biryani',s:100,m:150,l:200},
     {id:'bn08',name:'BT Fish Biryani',s:100,m:150,l:200},
     {id:'bn09',name:'Keema Biryani',s:100,m:150,l:200}
   ]},
   { cat: 'Curries (Veg)', items: [
-    {id:'cv01',name:'Rasam',s:50,m:70,l:90},
-    {id:'cv02',name:'Mixed Vegetable Curry',s:55,m:75,l:110},
-    {id:'cv03',name:'Aloo Gobii',s:55,m:75,l:110},
-    {id:'cv04',name:'Mirchi Ka Saalan',s:55,m:75,l:110},
-    {id:'cv05',name:'Chana Masala',s:55,m:75,l:110},
-    {id:'cv06',name:'Sambar',s:55,m:75,l:110},
-    {id:'cv07',name:'Dal Tadka',s:55,m:75,l:110},
-    {id:'cv08',name:'Tomato Curry',s:55,m:75,l:110},
-    {id:'cv09',name:'Bagara Baingan',s:65,m:85,l:120},
-    {id:'cv10',name:'Bhindi Masala',s:95,m:120,l:160},
-    {id:'cv11',name:'Paneer Tikka Masala',s:75,m:100,l:140},
+    {id:'cv02',name:'Mixed Vegetable Curry',s:70,m:90,l:120},
+    {id:'cv09',name:'Bagara Baingan',s:70,m:90,l:120},
+    {id:'cv03',name:'Aloo Gobi',s:70,m:90,l:120},
+    {id:'cv04',name:'Mirchi Ka Saalan',s:70,m:90,l:120},
+    {id:'cv10',name:'Bhindi Masala',s:80,m:110,l:150},
+    {id:'cv05',name:'Channa Masala',s:70,m:90,l:120},
+    {id:'cv06',name:'Sambar',s:70,m:90,l:120},
+    {id:'cv01',name:'Rasam',s:55,m:75,l:100},
+    {id:'cv11',name:'Paneer Tikka Masala',s:80,m:110,l:150},
+    {id:'cv15',name:'Paneer Butter Masala',s:80,m:110,l:150},
+    {id:'cv07',name:'Dal Tadka',s:70,m:90,l:120},
     {id:'cv12',name:'Bhindi Fry',s:90,m:130,l:180},
-    {id:'cv13',name:'Palak Paneer',s:75,m:100,l:140},
+    {id:'cv13',name:'Palak Paneer',s:80,m:110,l:150},
+    {id:'cv16',name:'Saag Paneer',s:80,m:110,l:150},
     {id:'cv14',name:'Malai Kofta',s:75,m:100,l:140}
   ]},
   { cat: 'Curries (Non-Veg)', items: [
@@ -2550,28 +2535,31 @@ const CATERING_MENU = [
     {id:'cn02',name:'Butter Chicken',s:90,m:120,l:160},
     {id:'cn03',name:'Chicken Tikka Masala',s:90,m:120,l:160},
     {id:'cn04',name:'Kara-hi Chicken',s:90,m:120,l:160},
-    {id:'cn05',name:'BT Shrimp Curry',s:100,m:150,l:200},
     {id:'cn06',name:'BT Mutton Curry',s:100,m:150,l:200},
     {id:'cn07',name:'Dum Ka Ghosh',s:100,m:150,l:200},
     {id:'cn08',name:'BT Fish Curry',s:100,m:150,l:200},
+    {id:'cn05',name:'BT Shrimp Curry',s:100,m:150,l:200},
     {id:'cn09',name:'Keema Curry',s:100,m:150,l:200},
-    {id:'cn10',name:'Egg Masala',s:65,m:85,l:120},
-    {id:'cn11',name:'Egg Burji',s:75,m:100,l:125},
+    {id:'cn10',name:'Egg Masala',s:80,m:110,l:140},
+    {id:'cn11',name:'Egg Burji',s:80,m:110,l:140},
     {id:'cn12',name:'Dum-Ka-Murg',s:90,m:120,l:160},
     {id:'cn13',name:'Natu Kodi (Country Chicken) Curry',s:100,m:150,l:200}
   ]},
-  { cat: 'Rice / Noodles', items: [
-    {id:'rn01',name:'Vegetable Fried Rice',s:65,m:85,l:120},
+  { cat: 'Rice / Noodles (Veg)', items: [
+    {id:'rn01',name:'Vegetable Fried Rice',s:70,m:90,l:125},
+    {id:'rn07',name:'Veg Noodles',s:70,m:90,l:125},
+    {id:'rn12',name:'Muddapappu Avakaya Rice',s:70,m:90,l:125}
+  ]},
+  { cat: 'Rice / Noodles (Non-Veg)', items: [
     {id:'rn02',name:'Egg Fried Rice',s:70,m:90,l:125},
     {id:'rn03',name:'Chicken Fried Rice',s:90,m:120,l:160},
-    {id:'rn04',name:'Schezwan Chicken Fried Rice',s:90,m:120,l:160},
-    {id:'rn05',name:'Schezwan Veg Fried Rice',s:65,m:85,l:120},
     {id:'rn06',name:'Shrimp Fried Rice',s:100,m:150,l:200},
-    {id:'rn07',name:'Veg Noodles',s:65,m:85,l:120},
     {id:'rn08',name:'Chicken Noodles',s:90,m:120,l:160},
-    {id:'rn09',name:'Shrimp Noodles',s:100,m:150,l:200},
-    {id:'rn10',name:'Schezwan Chicken Noodles',s:90,m:120,l:160},
-    {id:'rn11',name:'Schezwan Veg Noodles',s:65,m:85,l:120}
+    {id:'rn09',name:'Shrimp Noodles',s:100,m:150,l:200}
+  ]},
+  { cat: 'Sides', items: [
+    {id:'si01',name:'Raita',s:55,m:75,l:100},
+    {id:'si02',name:'Salan',s:55,m:75,l:100}
   ]},
   { cat: "Roti's / Breads", perPiece: true, items: [
     {id:'rb01',name:'Plain Naan',pp:2.99},
@@ -2583,7 +2571,7 @@ const CATERING_MENU = [
   ]},
   { cat: 'Dessert', items: [
     {id:'ds01',name:'Double Ka Meeta',s:50,m:75,l:100},
-    {id:'ds02',name:'Ras Malai',s:50,m:75,l:100},
+    {id:'ds02',name:'Rasmalai',s:50,m:75,l:100},
     {id:'ds03',name:'Gulab Jamun',s:50,m:75,l:100}
   ]}
 ];
@@ -2594,6 +2582,7 @@ function renderCateringMenu() {
   container.innerHTML = CATERING_MENU.map(cat =>
     `<div class="cat-category">
       <div class="cat-category-header">${cat.cat}</div>
+      ${!cat.perPiece ? `<div class="cat-size-header-row"><span></span><div class="cat-size-header-labels"><span>S</span><span>M</span><span>L</span></div></div>` : ''}
       ${cat.items.map(item => _renderCatItem(item, !!cat.perPiece)).join('')}
     </div>`
   ).join('');
