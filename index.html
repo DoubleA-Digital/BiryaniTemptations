@@ -4124,15 +4124,30 @@ async function doSignIn() {
   const email = document.getElementById('signin-email').value.trim();
   const password = document.getElementById('signin-password').value;
   const errEl = document.getElementById('signin-error');
+  const btn = document.querySelector('#section-signin .auth-submit');
   errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Signing in…'; btn.disabled = true;
 
   const { error } = await _supa.auth.signInWithPassword({ email, password });
+  btn.textContent = 'Sign In'; btn.disabled = false;
   if (error) {
-    errEl.textContent = error.message;
+    if (error.message.toLowerCase().includes('confirm') || error.message.toLowerCase().includes('not confirmed')) {
+      errEl.innerHTML = 'Please confirm your email first. <a href="#" onclick="resendConfirmation(\'' + email + '\');return false" style="color:var(--saffron);text-decoration:underline">Resend email</a>';
+    } else if (error.message.toLowerCase().includes('invalid') || error.message.toLowerCase().includes('credentials')) {
+      errEl.textContent = 'Incorrect email or password.';
+    } else {
+      errEl.textContent = error.message;
+    }
     errEl.style.display = 'block';
     return;
   }
   closeAuthModal();
+}
+
+async function resendConfirmation(email) {
+  await _supa.auth.resend({ type: 'signup', email });
+  document.getElementById('signin-error').textContent = 'Confirmation email resent — check your inbox.';
 }
 
 async function doSignUp() {

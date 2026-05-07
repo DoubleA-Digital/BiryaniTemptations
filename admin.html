@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BT Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --saffron: #E87000;
+  --saffron2: #C96200;
+  --saffron3: #FF9A30;
+  --bg: #0A0602;
+  --bg2: #110803;
+  --bg3: #190C05;
+  --card: #160A04;
+  --card2: #1E1008;
+  --cream: #F8EDD8;
+  --cream2: #E8D5B0;
+  --muted: rgba(248,237,216,0.5);
+  --border: rgba(232,112,0,0.12);
+  --border2: rgba(232,112,0,0.25);
+  --border3: rgba(232,112,0,0.45);
+  --green: #4CAF50;
+  --red: #e53935;
+  --blue: #64B5F6;
+  --yellow: #FFD54F;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --display: 'Playfair Display', serif;
+  --sidebar: 240px;
+  --radius: 10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--cream);font-family:var(--font);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:var(--font)}
+input,select,textarea{font-family:var(--font)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--saffron2);border-radius:3px}
+:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:32px}
+.login-box{background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:44px 40px;width:min(400px,90vw);text-align:center}
+.login-logo{font-family:var(--display);font-size:2rem;font-weight:900;color:var(--saffron);margin-bottom:4px}
+.login-sub{font-size:.78rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+.login-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--cream);padding:13px 16px;border-radius:8px;font-size:.95rem;margin-bottom:12px;transition:border-color .2s}
+.login-input:focus{outline:none;border-color:var(--saffron)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--saffron),var(--saffron3));color:#fff;border:none;padding:14px;border-radius:8px;font-size:.95rem;font-weight:600;letter-spacing:.4px;transition:opacity .2s,transform .15s}
+.login-btn:hover{opacity:.9;transform:translateY(-1px)}
+.login-btn:disabled{opacity:.5;transform:none}
+.login-err{color:var(--red);font-size:.82rem;margin-top:8px;display:none}
+
+/* ── LAYOUT ── */
+#app{display:none;min-height:100vh}
+#app.ready{display:flex}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .25s}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo-name{font-family:var(--display);font-size:1.1rem;font-weight:900;color:var(--saffron)}
+.sidebar-logo-sub{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-section-label{font-size:.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);padding:16px 20px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:var(--cream);opacity:.6;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{opacity:.9;background:rgba(232,112,0,.06)}
+.nav-item.active{opacity:1;color:var(--saffron);background:rgba(232,112,0,.08);border-left-color:var(--saffron)}
+.nav-item svg{flex-shrink:0;width:16px;height:16px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.logout-btn{width:100%;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.25);color:#ef9a9a;padding:9px;border-radius:8px;font-size:.82rem;font-weight:500;transition:all .2s}
+.logout-btn:hover{background:rgba(229,57,53,.2);border-color:rgba(229,57,53,.5)}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar);flex:1;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-size:1rem;font-weight:600;color:var(--cream)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.topbar-time{font-size:.78rem;color:var(--muted)}
+
+.page-content{padding:28px;max-width:1100px}
+.page-content.hidden{display:none}
+
+/* ── CARDS / STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--saffron),var(--saffron3))}
+.stat-label{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.stat-value{font-family:var(--display);font-size:2.2rem;font-weight:900;color:var(--cream);line-height:1}
+.stat-sub{font-size:.75rem;color:var(--muted);margin-top:6px}
+.stat-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:1.8rem;opacity:.15}
+
+/* ── SECTION HEADER ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.section-hdr h2{font-family:var(--display);font-size:1.4rem;font-weight:700;color:var(--cream)}
+.section-badge{background:rgba(232,112,0,.15);border:1px solid var(--border2);color:var(--saffron);font-size:.72rem;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:20px}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{text-align:left;padding:10px 14px;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border2);font-weight:600}
+.data-table td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:.875rem;vertical-align:top}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(232,112,0,.04)}
+.data-table-wrap{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+
+/* ── BADGES / STATUS ── */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:20px}
+.badge-new{background:rgba(76,175,80,.15);color:#81C784;border:1px solid rgba(76,175,80,.25)}
+.badge-confirmed{background:rgba(232,112,0,.15);color:var(--saffron3);border:1px solid var(--border2)}
+.badge-ready{background:rgba(100,181,246,.15);color:#90CAF9;border:1px solid rgba(100,181,246,.25)}
+.badge-completed{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+.badge-cancelled{background:rgba(229,57,53,.12);color:#ef9a9a;border:1px solid rgba(229,57,53,.2)}
+.badge-pending{background:rgba(255,213,79,.12);color:#FFD54F;border:1px solid rgba(255,213,79,.2)}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border-radius:7px;font-size:.8rem;font-weight:600;border:none;transition:all .15s;cursor:pointer;letter-spacing:.3px}
+.btn-primary{background:var(--saffron);color:#fff}
+.btn-primary:hover{background:var(--saffron2)}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--cream)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:rgba(229,57,53,.15);border:1px solid rgba(229,57,53,.25);color:#ef9a9a}
+.btn-danger:hover{background:rgba(229,57,53,.25)}
+.btn-sm{padding:5px 11px;font-size:.74rem}
+.btn-icon{background:none;border:none;padding:6px;border-radius:6px;color:var(--muted);transition:all .15s}
+.btn-icon:hover{background:rgba(255,255,255,.08);color:var(--cream)}
+
+/* ── FILTERS ── */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-chip{padding:6px 14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--cream);font-family:var(--font);font-size:.78rem;font-weight:500;border-radius:20px;cursor:pointer;transition:all .15s}
+.filter-chip.active{background:var(--saffron);border-color:var(--saffron);color:#fff}
+.filter-chip:hover:not(.active){border-color:var(--saffron);color:var(--saffron)}
+
+/* ── FORM ELEMENTS ── */
+.form-input,.form-select,.form-textarea{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--cream);padding:10px 13px;border-radius:8px;font-size:.875rem;width:100%;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--saffron)}
+.form-select option{background:var(--card2)}
+.form-label{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px;display:block}
+.form-group{margin-bottom:16px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:min(560px,100%);max-height:90vh;overflow-y:auto;position:relative}
+.modal-title{font-family:var(--display);font-size:1.3rem;font-weight:700;margin-bottom:20px;color:var(--cream)}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s}
+.modal-close:hover{background:rgba(255,255,255,.08);color:var(--cream)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── ORDER DETAIL ── */
+.order-items-list{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:12px;margin:12px 0}
+.order-item-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.order-item-row:last-child{border-bottom:none}
+.order-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.order-info-item label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+.order-info-item span{font-size:.875rem;color:var(--cream)}
+
+/* ── CUSTOMER CARD ── */
+.customer-row{display:flex;align-items:center;gap:14px}
+.customer-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--saffron2),var(--saffron3));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#fff;flex-shrink:0}
+.customer-name{font-weight:500;font-size:.9rem}
+.customer-email{font-size:.75rem;color:var(--muted)}
+.points-badge{background:rgba(232,112,0,.15);border:1px solid var(--border2);color:var(--saffron3);font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:12px}
+
+/* ── REWARD ITEM ── */
+.reward-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
+.reward-card:hover{border-color:var(--border2)}
+.reward-emoji{font-size:1.8rem;flex-shrink:0}
+.reward-info{flex:1}
+.reward-name{font-weight:600;font-size:.9rem;margin-bottom:2px}
+.reward-pts{font-size:.78rem;color:var(--saffron)}
+.reward-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+
+/* ── SETTINGS ── */
+.settings-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px}
+.settings-card h3{font-size:.85rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--saffron);margin-bottom:16px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:.875rem;font-weight:500}
+.toggle-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--saffron)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+.hours-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;font-size:.85rem}
+.hours-grid-hdr{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:12px}
+.empty-text{font-size:.9rem}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:28px;right:28px;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:.875rem;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;max-width:300px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-color:rgba(76,175,80,.4);color:#81C784}
+#toast.error{border-color:rgba(229,57,53,.4);color:#ef9a9a}
+
+/* ── SEARCH ── */
+.search-input{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--cream);padding:8px 14px;border-radius:8px;font-size:.84rem;width:220px;transition:border-color .2s}
+.search-input:focus{outline:none;border-color:var(--saffron);width:260px}
+.search-input::placeholder{color:var(--muted)}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:16px}
+.page-btn{padding:5px 11px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--cream);font-size:.78rem;border-radius:6px;cursor:pointer;transition:all .15s}
+.page-btn.active{background:var(--saffron);border-color:var(--saffron);color:#fff}
+.page-btn:hover:not(.active){border-color:var(--saffron);color:var(--saffron)}
+
+/* ── MOBILE ── */
+#mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:60;background:var(--card2);border:1px solid var(--border2);color:var(--cream);padding:8px 11px;border-radius:8px;font-size:1rem}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:45}
+
+@media(max-width:768px){
+  #mobile-toggle{display:block}
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+  #main{margin-left:0}
+  .topbar{padding:0 16px 0 56px}
+  .page-content{padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .order-info-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Biryani Temptations</div>
+    <div class="login-sub">Admin Dashboard</div>
+    <input type="password" class="login-input" id="login-pw" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Access Dashboard</button>
+    <div class="login-err" id="login-err">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">BT Admin</div>
+      <div class="sidebar-logo-sub">Dashboard</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item" onclick="showPage('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Orders
+        <span id="nav-orders-badge" style="display:none;margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:10px"></span>
+      </div>
+      <div class="nav-item" onclick="showPage('catering')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        Catering Inquiries
+        <span id="nav-catering-badge" style="display:none;margin-left:auto;background:var(--saffron);color:#fff;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:10px"></span>
+      </div>
+      <div class="nav-section-label">People</div>
+      <div class="nav-item" onclick="showPage('customers')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Customers
+      </div>
+      <div class="nav-item" onclick="showPage('rewards')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Rewards
+      </div>
+      <div class="nav-section-label">Config</div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div class="topbar">
+      <button id="mobile-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="page-title">Dashboard</span>
+      <div class="topbar-right">
+        <div class="status-dot" id="realtime-dot"></div>
+        <span class="topbar-time" id="clock"></span>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page-content" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Orders Today</div>
+          <div class="stat-value" id="stat-orders-today">—</div>
+          <div class="stat-sub" id="stat-orders-today-sub"></div>
+          <div class="stat-icon">📦</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Orders</div>
+          <div class="stat-value" id="stat-pending">—</div>
+          <div class="stat-sub">Need attention</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">New Inquiries</div>
+          <div class="stat-value" id="stat-inquiries">—</div>
+          <div class="stat-sub">Catering requests</div>
+          <div class="stat-icon">✉️</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Customers</div>
+          <div class="stat-value" id="stat-customers">—</div>
+          <div class="stat-sub">Registered accounts</div>
+          <div class="stat-icon">👥</div>
+        </div>
+      </div>
+
+      <div class="section-hdr">
+        <h2>Recent Orders</h2>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('orders')">View All →</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Type</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="dashboard-orders"></tbody>
+        </table>
+      </div>
+
+      <div class="section-hdr" style="margin-top:28px">
+        <h2>Recent Catering Inquiries</h2>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('catering')">View All →</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Event</th><th>Date</th><th>Status</th><th>Submitted</th></tr></thead>
+          <tbody id="dashboard-inquiries"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page-content hidden" id="page-orders">
+      <div class="section-hdr">
+        <h2>Orders</h2>
+        <input type="text" class="search-input" placeholder="Search orders…" oninput="filterOrders(this.value)">
+      </div>
+      <div class="filter-row" id="order-filters">
+        <button class="filter-chip active" onclick="setOrderFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="setOrderFilter('new',this)">New</button>
+        <button class="filter-chip" onclick="setOrderFilter('confirmed',this)">Confirmed</button>
+        <button class="filter-chip" onclick="setOrderFilter('ready',this)">Ready</button>
+        <button class="filter-chip" onclick="setOrderFilter('completed',this)">Completed</button>
+        <button class="filter-chip" onclick="setOrderFilter('cancelled',this)">Cancelled</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Type</th><th>Status</th><th>Time</th><th></th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATERING -->
+    <div class="page-content hidden" id="page-catering">
+      <div class="section-hdr">
+        <h2>Catering Inquiries</h2>
+        <input type="text" class="search-input" placeholder="Search inquiries…" oninput="filterInquiries(this.value)">
+      </div>
+      <div class="filter-row">
+        <button class="filter-chip active" onclick="setCateringFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="setCateringFilter('new',this)">New</button>
+        <button class="filter-chip" onclick="setCateringFilter('confirmed',this)">Confirmed</button>
+        <button class="filter-chip" onclick="setCateringFilter('completed',this)">Completed</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Contact</th><th>Event</th><th>Date</th><th>Guests</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+          <tbody id="catering-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="page-content hidden" id="page-customers">
+      <div class="section-hdr">
+        <h2>Customers</h2>
+        <input type="text" class="search-input" placeholder="Search customers…" oninput="filterCustomers(this.value)">
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Customer</th><th>Phone</th><th>Points</th><th>Joined</th><th></th></tr></thead>
+          <tbody id="customers-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REWARDS -->
+    <div class="page-content hidden" id="page-rewards">
+      <div class="section-hdr">
+        <h2>Reward Items</h2>
+        <button class="btn btn-primary btn-sm" onclick="openRewardModal()">+ Add Reward</button>
+      </div>
+      <div class="reward-grid" id="rewards-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page-content hidden" id="page-settings">
+      <div class="section-hdr"><h2>Settings</h2></div>
+
+      <div class="settings-card">
+        <h3>Store Status</h3>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Delivery</div>
+            <div class="toggle-sub">Accept delivery orders</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="toggle-delivery" onchange="saveSetting('delivery',this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Pickup</div>
+            <div class="toggle-sub">Accept pickup orders</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="toggle-pickup" onchange="saveSetting('pickup',this.checked)"><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Delivery Time (min)</label>
+            <input type="number" class="form-input" id="input-delivery-time" onchange="saveSetting('deliveryTime',this.value)" min="10" max="180">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Min Order ($)</label>
+            <input type="number" class="form-input" id="input-delivery-min" onchange="saveSetting('deliveryMin',this.value)" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pickup Time (min)</label>
+            <input type="number" class="form-input" id="input-pickup-time" onchange="saveSetting('pickupTime',this.value)" min="5" max="90">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h3>Hours of Operation</h3>
+        <div class="hours-grid" style="margin-bottom:8px">
+          <span class="hours-grid-hdr">Day</span>
+          <span class="hours-grid-hdr">Open</span>
+          <span class="hours-grid-hdr">Lunch</span>
+          <span class="hours-grid-hdr">Dinner</span>
+        </div>
+        <div id="hours-rows"></div>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="saveHours()">Save Hours</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('order-modal')">✕</button>
+    <div class="modal-title" id="order-modal-title">Order Details</div>
+    <div id="order-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="order-delete-btn">Delete</button>
+      <div style="flex:1"></div>
+      <select class="form-select" id="order-status-select" style="width:auto;padding:8px 12px">
+        <option value="new">New</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="ready">Ready</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-primary" onclick="saveOrderStatus()">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATERING DETAIL MODAL -->
+<div class="modal-overlay" id="catering-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('catering-modal')">✕</button>
+    <div class="modal-title" id="catering-modal-title">Catering Inquiry</div>
+    <div id="catering-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="catering-delete-btn">Delete</button>
+      <div style="flex:1"></div>
+      <select class="form-select" id="catering-status-select" style="width:auto;padding:8px 12px">
+        <option value="new">New</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-primary" onclick="saveCateringStatus()">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- POINTS MODAL -->
+<div class="modal-overlay" id="points-modal">
+  <div class="modal" style="max-width:360px">
+    <button class="modal-close" onclick="closeModal('points-modal')">✕</button>
+    <div class="modal-title">Adjust Points</div>
+    <div id="points-modal-name" style="color:var(--muted);font-size:.85rem;margin-bottom:16px"></div>
+    <div class="form-group">
+      <label class="form-label">New Point Balance</label>
+      <input type="number" class="form-input" id="points-input" min="0">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('points-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePoints()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- REWARD MODAL -->
+<div class="modal-overlay" id="reward-modal">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('reward-modal')">✕</button>
+    <div class="modal-title" id="reward-modal-title">Add Reward</div>
+    <div class="form-group">
+      <label class="form-label">Reward Name</label>
+      <input type="text" class="form-input" id="reward-name-input" placeholder="e.g. Free Naan">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input type="text" class="form-input" id="reward-emoji-input" placeholder="🎁" maxlength="4">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Points Required</label>
+      <input type="number" class="form-input" id="reward-pts-input" placeholder="100" min="1">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('reward-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReward()">Save Reward</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASS = 'btadmin2024';
+const SUPA_URL = 'https://esogrnjilzxcmvgpieib.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzb2dybmppbHp4Y212Z3BpZWliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MTE3MDQsImV4cCI6MjA4OTk4NzcwNH0.x8KJldScjb2VsC-CGbPknOLppkozjjfhbbX9zwiYh_A';
+
+const _supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── STATE ──
+let allOrders = [], allInquiries = [], allCustomers = [], allRewards = [];
+let orderFilter = 'all', orderSearch = '', cateringFilter = 'all', cateringSearch = '', customerSearch = '';
+let currentOrderId = null, currentInquiryId = null, currentCustomerId = null, currentRewardId = null;
+let settingsData = {}, hoursData = {};
+let realtimeChannel = null;
+
+// ── LOGIN ──
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === ADMIN_PASS) {
+    document.getElementById('login-err').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('ready');
+    initDashboard();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+  }
+}
+function doLogout() {
+  document.getElementById('app').classList.remove('ready');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+  if (realtimeChannel) _supa.removeChannel(realtimeChannel);
+}
+
+// ── CLOCK ──
+function startClock() {
+  const el = document.getElementById('clock');
+  function tick() {
+    el.textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+// ── SIDEBAR ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function showPage(page) {
+  document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + page).classList.remove('hidden');
+  document.querySelector(`.nav-item[onclick*="${page}"]`).classList.add('active');
+  document.getElementById('page-title').textContent = {
+    dashboard:'Dashboard', orders:'Orders', catering:'Catering Inquiries',
+    customers:'Customers', rewards:'Rewards', settings:'Settings'
+  }[page];
+  if (document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+  if (page === 'orders') renderOrders();
+  if (page === 'catering') renderInquiries();
+  if (page === 'customers') renderCustomers();
+  if (page === 'rewards') renderRewards();
+  if (page === 'settings') renderSettings();
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 2800);
+}
+
+// ── MODAL ──
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+// ── INIT ──
+async function initDashboard() {
+  startClock();
+  await Promise.all([loadOrders(), loadInquiries(), loadCustomers(), loadRewards(), loadSettings()]);
+  renderDashboard();
+  startRealtime();
+}
+
+// ── DATA LOADING ──
+async function loadOrders() {
+  const { data } = await _supa.from('orders').select('*').order('created_at', {ascending:false}).limit(200);
+  allOrders = data || [];
+}
+async function loadInquiries() {
+  const { data } = await _supa.from('inquiries').select('*').order('created_at', {ascending:false}).limit(200);
+  allInquiries = data || [];
+}
+async function loadCustomers() {
+  const { data } = await _supa.from('profiles').select('*').order('created_at', {ascending:false});
+  allCustomers = data || [];
+}
+async function loadRewards() {
+  const { data } = await _supa.from('reward_items').select('*').order('created_at', {ascending:false});
+  allRewards = data || [];
+}
+async function loadSettings() {
+  try {
+    const raw = localStorage.getItem('bt_delivery');
+    settingsData = raw ? JSON.parse(raw) : { delivery: false, deliveryTime: '45', deliveryMin: '50', pickup: true, pickupTime: '20' };
+    const hrs = localStorage.getItem('bt_hours');
+    hoursData = hrs ? JSON.parse(hrs) : getDefaultHours();
+  } catch(e) { settingsData = {}; hoursData = getDefaultHours(); }
+}
+function getDefaultHours() {
+  return {
+    0:{day:'Sunday',open:true,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    1:{day:'Monday',open:false,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    2:{day:'Tuesday',open:false,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    3:{day:'Wednesday',open:true,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    4:{day:'Thursday',open:true,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    5:{day:'Friday',open:true,lunch:['11:30','14:30'],dinner:['17:30','22:00']},
+    6:{day:'Saturday',open:true,lunch:['11:30','14:30'],dinner:['17:30','22:00']}
+  };
+}
+
+// ── REALTIME ──
+function startRealtime() {
+  realtimeChannel = _supa.channel('admin-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+      await loadOrders(); renderDashboard(); renderOrders(); updateBadges();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'inquiries' }, async () => {
+      await loadInquiries(); renderDashboard(); renderInquiries(); updateBadges();
+    })
+    .subscribe(status => {
+      document.getElementById('realtime-dot').style.background = status === 'SUBSCRIBED' ? 'var(--green)' : '#888';
+    });
+}
+
+// ── BADGES ──
+function updateBadges() {
+  const newOrders = allOrders.filter(o => o.status === 'new' && !o.admin_hidden).length;
+  const newInq = allInquiries.filter(i => i.status === 'new').length;
+  const ob = document.getElementById('nav-orders-badge');
+  const ib = document.getElementById('nav-catering-badge');
+  ob.textContent = newOrders; ob.style.display = newOrders ? '' : 'none';
+  ib.textContent = newInq; ib.style.display = newInq ? '' : 'none';
+}
+
+// ── HELPERS ──
+const _esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+}
+function fmtDateShort(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-US', {month:'short',day:'numeric'});
+}
+function statusBadge(s) {
+  const map = {new:'badge-new',confirmed:'badge-confirmed',ready:'badge-ready',completed:'badge-completed',cancelled:'badge-cancelled',pending:'badge-pending'};
+  return `<span class="badge ${map[s]||'badge-pending'}">${s||'—'}</span>`;
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const today = new Date().toDateString();
+  const todayOrders = allOrders.filter(o => new Date(o.created_at).toDateString() === today);
+  const pending = allOrders.filter(o => ['new','confirmed'].includes(o.status) && !o.admin_hidden);
+  const newInq = allInquiries.filter(i => i.status === 'new');
+
+  document.getElementById('stat-orders-today').textContent = todayOrders.length;
+  document.getElementById('stat-orders-today-sub').textContent = `$${todayOrders.reduce((s,o)=>s+(+o.subtotal||0),0).toFixed(2)} today`;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-inquiries').textContent = newInq.length;
+  document.getElementById('stat-customers').textContent = allCustomers.length;
+
+  // Recent orders (5)
+  const recOrders = allOrders.filter(o => !o.admin_hidden).slice(0,5);
+  document.getElementById('dashboard-orders').innerHTML = recOrders.length
+    ? recOrders.map(o => `<tr>
+        <td style="font-family:monospace;font-size:.8rem;color:var(--saffron)">${_esc(o.order_num||'#'+o.id)}</td>
+        <td>${_esc(o.customer_name||'—')}</td>
+        <td>$${(+o.subtotal||0).toFixed(2)}</td>
+        <td><span style="font-size:.78rem;color:var(--muted)">${_esc(o.order_type||'—')}</span></td>
+        <td>${statusBadge(o.status)}</td>
+        <td style="font-size:.78rem;color:var(--muted)">${fmtDate(o.created_at)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders yet</div></div></td></tr>`;
+
+  // Recent inquiries (5)
+  const recInq = allInquiries.slice(0,5);
+  document.getElementById('dashboard-inquiries').innerHTML = recInq.length
+    ? recInq.map(i => `<tr>
+        <td>${_esc(i.name||'—')}</td>
+        <td><span style="font-size:.8rem;color:var(--muted)">${_esc(i.event_type||'—')}</span></td>
+        <td>${_esc(i.event_date||'—')}</td>
+        <td>${statusBadge(i.status)}</td>
+        <td style="font-size:.78rem;color:var(--muted)">${fmtDate(i.created_at)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✉️</div><div class="empty-text">No inquiries yet</div></div></td></tr>`;
+
+  updateBadges();
+}
+
+// ── ORDERS ──
+function setOrderFilter(f, el) {
+  orderFilter = f;
+  document.querySelectorAll('#order-filters .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+function filterOrders(v) { orderSearch = v.toLowerCase(); renderOrders(); }
+function renderOrders() {
+  let data = allOrders.filter(o => !o.admin_hidden);
+  if (orderFilter !== 'all') data = data.filter(o => o.status === orderFilter);
+  if (orderSearch) data = data.filter(o =>
+    (o.order_num||'').toLowerCase().includes(orderSearch) ||
+    (o.customer_name||'').toLowerCase().includes(orderSearch) ||
+    (o.customer_email||'').toLowerCase().includes(orderSearch) ||
+    (o.customer_phone||'').includes(orderSearch)
+  );
+  const tbody = document.getElementById('orders-tbody');
+  tbody.innerHTML = data.length
+    ? data.map(o => {
+        const items = Array.isArray(o.items) ? o.items : (o.items ? JSON.parse(o.items) : []);
+        return `<tr>
+          <td style="font-family:monospace;font-size:.78rem;color:var(--saffron)">${_esc(o.order_num||'#'+o.id)}</td>
+          <td>
+            <div style="font-weight:500">${_esc(o.customer_name||'—')}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${_esc(o.customer_phone||'')}</div>
+          </td>
+          <td style="font-size:.78rem;color:var(--muted)">${items.length} item${items.length!==1?'s':''}</td>
+          <td style="font-weight:600">$${(+o.subtotal||0).toFixed(2)}</td>
+          <td><span style="font-size:.78rem;color:var(--muted)">${_esc(o.order_type||'—')}</span></td>
+          <td>${statusBadge(o.status)}</td>
+          <td style="font-size:.75rem;color:var(--muted)">${fmtDate(o.created_at)}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="openOrderModal(${o.id})">View</button></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">No orders found</div></div></td></tr>`;
+}
+
+function openOrderModal(id) {
+  const o = allOrders.find(x => x.id === id);
+  if (!o) return;
+  currentOrderId = id;
+  document.getElementById('order-modal-title').textContent = 'Order ' + (o.order_num || '#' + o.id);
+  document.getElementById('order-status-select').value = o.status || 'new';
+
+  let items = [];
+  try { items = Array.isArray(o.items) ? o.items : JSON.parse(o.items||'[]'); } catch(e){}
+
+  document.getElementById('order-modal-body').innerHTML = `
+    <div class="order-info-grid">
+      <div class="order-info-item"><label>Customer</label><span>${_esc(o.customer_name||'—')}</span></div>
+      <div class="order-info-item"><label>Phone</label><span>${_esc(o.customer_phone||'—')}</span></div>
+      <div class="order-info-item"><label>Email</label><span>${_esc(o.customer_email||'—')}</span></div>
+      <div class="order-info-item"><label>Order Type</label><span>${_esc(o.order_type||'—')}</span></div>
+      <div class="order-info-item"><label>Placed</label><span>${fmtDate(o.created_at)}</span></div>
+      <div class="order-info-item"><label>Status</label><span>${statusBadge(o.status)}</span></div>
+      ${o.address ? `<div class="order-info-item" style="grid-column:1/-1"><label>Address</label><span>${_esc(o.address)}</span></div>` : ''}
+      ${o.notes ? `<div class="order-info-item" style="grid-column:1/-1"><label>Notes</label><span>${_esc(o.notes)}</span></div>` : ''}
+    </div>
+    <div class="order-items-list">
+      ${items.map(it => `<div class="order-item-row"><span>${_esc(it.name||it.item||'Item')}${it.qty>1?` ×${it.qty}`:''}</span><span style="color:var(--saffron)">$${(+(it.price||it.total||0)*(it.qty||1)).toFixed(2)}</span></div>`).join('')}
+      <div class="order-item-row" style="font-weight:700;border-top:1px solid var(--border2);margin-top:4px;padding-top:8px"><span>Total</span><span style="color:var(--saffron)">$${(+o.subtotal||0).toFixed(2)}</span></div>
+    </div>`;
+
+  document.getElementById('order-delete-btn').onclick = () => deleteOrder(id);
+  document.getElementById('order-modal').classList.add('open');
+}
+
+async function saveOrderStatus() {
+  if (!currentOrderId) return;
+  const status = document.getElementById('order-status-select').value;
+  const { error } = await _supa.from('orders').update({ status }).eq('id', currentOrderId);
+  if (error) { showToast('Failed to update status', 'error'); return; }
+  const o = allOrders.find(x => x.id === currentOrderId);
+  if (o) o.status = status;
+  closeModal('order-modal');
+  renderOrders(); renderDashboard();
+  showToast('Order status updated');
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Hide this order from the dashboard?')) return;
+  await _supa.from('orders').update({ admin_hidden: true }).eq('id', id);
+  allOrders = allOrders.filter(o => o.id !== id);
+  closeModal('order-modal');
+  renderOrders(); renderDashboard();
+  showToast('Order hidden');
+}
+
+// ── CATERING ──
+function setCateringFilter(f, el) {
+  cateringFilter = f;
+  document.querySelectorAll('#page-catering .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderInquiries();
+}
+function filterInquiries(v) { cateringSearch = v.toLowerCase(); renderInquiries(); }
+function renderInquiries() {
+  let data = allInquiries;
+  if (cateringFilter !== 'all') data = data.filter(i => i.status === cateringFilter);
+  if (cateringSearch) data = data.filter(i =>
+    (i.name||'').toLowerCase().includes(cateringSearch) ||
+    (i.email||'').toLowerCase().includes(cateringSearch) ||
+    (i.phone||'').includes(cateringSearch)
+  );
+  const tbody = document.getElementById('catering-tbody');
+  tbody.innerHTML = data.length
+    ? data.map(i => `<tr>
+        <td>
+          <div style="font-weight:500">${_esc(i.name||'—')}</div>
+          <div style="font-size:.75rem;color:var(--muted)">${_esc(i.email||'')}</div>
+        </td>
+        <td style="font-size:.78rem">${_esc(i.phone||'—')}</td>
+        <td><span style="font-size:.8rem;color:var(--muted)">${_esc(i.event_type||'—')}</span></td>
+        <td style="font-size:.85rem">${_esc(i.event_date||'—')}</td>
+        <td style="font-size:.85rem">${_esc(i.guests||'—')}</td>
+        <td>${statusBadge(i.status)}</td>
+        <td style="font-size:.75rem;color:var(--muted)">${fmtDate(i.created_at)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openCateringModal(${i.id})">View</button></td>
+      </tr>`).join('')
+    : `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">✉️</div><div class="empty-text">No inquiries found</div></div></td></tr>`;
+}
+
+function openCateringModal(id) {
+  const i = allInquiries.find(x => x.id === id);
+  if (!i) return;
+  currentInquiryId = id;
+  document.getElementById('catering-modal-title').textContent = 'Inquiry — ' + (i.name||'Unknown');
+  document.getElementById('catering-status-select').value = i.status || 'new';
+
+  let items = [];
+  try { items = i.items ? (Array.isArray(i.items) ? i.items : JSON.parse(i.items)) : []; } catch(e){}
+
+  document.getElementById('catering-modal-body').innerHTML = `
+    <div class="order-info-grid">
+      <div class="order-info-item"><label>Name</label><span>${_esc(i.name||'—')}</span></div>
+      <div class="order-info-item"><label>Phone</label><span>${_esc(i.phone||'—')}</span></div>
+      <div class="order-info-item"><label>Email</label><span>${_esc(i.email||'—')}</span></div>
+      <div class="order-info-item"><label>Event Type</label><span>${_esc(i.event_type||'—')}</span></div>
+      <div class="order-info-item"><label>Event Date</label><span>${_esc(i.event_date||'—')}</span></div>
+      <div class="order-info-item"><label>Guests</label><span>${_esc(i.guests||'—')}</span></div>
+      <div class="order-info-item"><label>Tray Size</label><span>${_esc(i.tray_size||'—')}</span></div>
+      <div class="order-info-item"><label>Submitted</label><span>${fmtDate(i.created_at)}</span></div>
+      ${i.notes ? `<div class="order-info-item" style="grid-column:1/-1"><label>Notes</label><span>${_esc(i.notes)}</span></div>` : ''}
+    </div>
+    ${items.length ? `<div class="order-items-list">${items.map(it=>`<div class="order-item-row"><span>${_esc(it.name||'—')} (${_esc(it.size||'—')})</span><span style="color:var(--saffron)">×${it.qty||1} — $${(+(it.price||0)*(it.qty||1)).toFixed(2)}</span></div>`).join('')}</div>` : ''}`;
+
+  document.getElementById('catering-delete-btn').onclick = () => deleteCatering(id);
+  document.getElementById('catering-modal').classList.add('open');
+}
+
+async function saveCateringStatus() {
+  if (!currentInquiryId) return;
+  const status = document.getElementById('catering-status-select').value;
+  const { error } = await _supa.from('inquiries').update({ status }).eq('id', currentInquiryId);
+  if (error) { showToast('Failed to update', 'error'); return; }
+  const i = allInquiries.find(x => x.id === currentInquiryId);
+  if (i) i.status = status;
+  closeModal('catering-modal');
+  renderInquiries(); renderDashboard();
+  showToast('Inquiry status updated');
+}
+
+async function deleteCatering(id) {
+  if (!confirm('Delete this inquiry?')) return;
+  await _supa.from('inquiries').delete().eq('id', id);
+  allInquiries = allInquiries.filter(i => i.id !== id);
+  closeModal('catering-modal');
+  renderInquiries(); renderDashboard();
+  showToast('Inquiry deleted');
+}
+
+// ── CUSTOMERS ──
+function filterCustomers(v) { customerSearch = v.toLowerCase(); renderCustomers(); }
+function renderCustomers() {
+  let data = allCustomers;
+  if (customerSearch) data = data.filter(c =>
+    (c.name||'').toLowerCase().includes(customerSearch) ||
+    (c.phone||'').includes(customerSearch)
+  );
+  const tbody = document.getElementById('customers-tbody');
+  tbody.innerHTML = data.length
+    ? data.map(c => {
+        const initials = (c.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        return `<tr>
+          <td>
+            <div class="customer-row">
+              <div class="customer-avatar">${initials}</div>
+              <div><div class="customer-name">${_esc(c.name||'—')}</div></div>
+            </div>
+          </td>
+          <td style="font-size:.85rem">${_esc(c.phone||'—')}</td>
+          <td><span class="points-badge">⭐ ${c.points||0} pts</span></td>
+          <td style="font-size:.75rem;color:var(--muted)">${fmtDateShort(c.created_at)}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="openPointsModal('${c.id}','${_esc(c.name||'')}',${c.points||0})">Edit Points</button></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">No customers yet</div></div></td></tr>`;
+}
+
+function openPointsModal(id, name, pts) {
+  currentCustomerId = id;
+  document.getElementById('points-modal-name').textContent = name;
+  document.getElementById('points-input').value = pts;
+  document.getElementById('points-modal').classList.add('open');
+}
+
+async function savePoints() {
+  const pts = parseInt(document.getElementById('points-input').value) || 0;
+  const { error } = await _supa.from('profiles').update({ points: pts }).eq('id', currentCustomerId);
+  if (error) { showToast('Failed to update points', 'error'); return; }
+  const c = allCustomers.find(x => x.id === currentCustomerId);
+  if (c) c.points = pts;
+  closeModal('points-modal');
+  renderCustomers();
+  showToast('Points updated');
+}
+
+// ── REWARDS ──
+function renderRewards() {
+  const grid = document.getElementById('rewards-grid');
+  grid.innerHTML = allRewards.length
+    ? allRewards.map(r => `
+        <div class="reward-card">
+          <div class="reward-emoji">${r.emoji||'🎁'}</div>
+          <div class="reward-info">
+            <div class="reward-name">${_esc(r.name)}</div>
+            <div class="reward-pts">⭐ ${r.points_required} points required</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-ghost btn-sm" onclick="openRewardModal(${r.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteReward(${r.id})">✕</button>
+          </div>
+        </div>`).join('')
+    : `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⭐</div><div class="empty-text">No rewards yet. Add one above.</div></div>`;
+}
+
+function openRewardModal(id) {
+  currentRewardId = id || null;
+  const r = id ? allRewards.find(x => x.id === id) : null;
+  document.getElementById('reward-modal-title').textContent = r ? 'Edit Reward' : 'Add Reward';
+  document.getElementById('reward-name-input').value = r ? r.name : '';
+  document.getElementById('reward-emoji-input').value = r ? (r.emoji||'🎁') : '🎁';
+  document.getElementById('reward-pts-input').value = r ? r.points_required : '';
+  document.getElementById('reward-modal').classList.add('open');
+}
+
+async function saveReward() {
+  const name = document.getElementById('reward-name-input').value.trim();
+  const emoji = document.getElementById('reward-emoji-input').value.trim() || '🎁';
+  const points_required = parseInt(document.getElementById('reward-pts-input').value) || 100;
+  if (!name) { showToast('Enter a reward name', 'error'); return; }
+
+  if (currentRewardId) {
+    const { error } = await _supa.from('reward_items').update({ name, emoji, points_required }).eq('id', currentRewardId);
+    if (error) { showToast('Failed to save', 'error'); return; }
+    const r = allRewards.find(x => x.id === currentRewardId);
+    if (r) { r.name = name; r.emoji = emoji; r.points_required = points_required; }
+  } else {
+    const { data, error } = await _supa.from('reward_items').insert({ name, emoji, points_required, active: true }).select().single();
+    if (error) { showToast('Failed to save', 'error'); return; }
+    if (data) allRewards.unshift(data);
+  }
+  closeModal('reward-modal');
+  renderRewards();
+  showToast('Reward saved');
+}
+
+async function deleteReward(id) {
+  if (!confirm('Delete this reward?')) return;
+  await _supa.from('reward_items').delete().eq('id', id);
+  allRewards = allRewards.filter(r => r.id !== id);
+  renderRewards();
+  showToast('Reward deleted');
+}
+
+// ── SETTINGS ──
+function renderSettings() {
+  document.getElementById('toggle-delivery').checked = !!settingsData.delivery;
+  document.getElementById('toggle-pickup').checked = settingsData.pickup !== false;
+  document.getElementById('input-delivery-time').value = settingsData.deliveryTime || '45';
+  document.getElementById('input-delivery-min').value = settingsData.deliveryMin || '50';
+  document.getElementById('input-pickup-time').value = settingsData.pickupTime || '20';
+  renderHours();
+}
+
+function saveSetting(key, val) {
+  settingsData[key] = val;
+  localStorage.setItem('bt_delivery', JSON.stringify(settingsData));
+  showToast('Setting saved');
+}
+
+function renderHours() {
+  const container = document.getElementById('hours-rows');
+  container.innerHTML = Object.values(hoursData).map((d, i) => `
+    <div class="hours-grid" style="padding:8px 0;border-top:1px solid var(--border)">
+      <span style="font-size:.85rem;font-weight:500">${d.day}</span>
+      <label class="toggle" style="margin:0"><input type="checkbox" id="hrs-open-${i}" ${d.open?'checked':''}><span class="toggle-slider"></span></label>
+      <input type="time" class="form-input" id="hrs-lunch-start-${i}" value="${(d.lunch||[])[0]||'11:30'}" style="padding:6px 8px;font-size:.78rem;width:100px">
+      <input type="time" class="form-input" id="hrs-dinner-start-${i}" value="${(d.dinner||[])[0]||'17:30'}" style="padding:6px 8px;font-size:.78rem;width:100px">
+    </div>`).join('');
+}
+
+function saveHours() {
+  Object.values(hoursData).forEach((d, i) => {
+    d.open = document.getElementById(`hrs-open-${i}`).checked;
+    d.lunch[0] = document.getElementById(`hrs-lunch-start-${i}`).value;
+    d.dinner[0] = document.getElementById(`hrs-dinner-start-${i}`).value;
+  });
+  localStorage.setItem('bt_hours', JSON.stringify(hoursData));
+  showToast('Hours saved');
+}
+
+// ── START ──
+startClock();
+document.getElementById('login-pw').focus();
+</script>
+</body>
+</html>
