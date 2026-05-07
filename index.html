@@ -666,9 +666,10 @@ img { max-width: 100%; display: block; }
 .cat-size-header-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: rgba(232,112,0,.08); border-top: 1px solid var(--border2); }
 .cat-size-header-labels { display: flex; gap: 6px; align-items: center; }
 .cat-size-header-labels span { font-family: var(--font-body); font-size: .72rem; font-weight: 700; letter-spacing: 2px; color: var(--saffron); text-transform: uppercase; min-width: 64px; text-align: center; }
-.cat-item-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-top: 1px solid var(--border); background: var(--card-bg); gap: 14px; transition: background .15s; }
+.cat-item-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--card-bg); gap: 14px; transition: background .15s; }
 .cat-item-row:hover { background: var(--card-bg2); }
-.cat-item-name { font-family: var(--font-sub); font-size: .9rem; color: var(--cream); flex: 1; min-width: 0; padding-right: 8px; }
+.cat-item-name { font-family: var(--font-sub); font-size: 1.05rem; color: var(--cream); flex: 1; min-width: 0; padding-right: 12px; font-weight: 600; }
+.cat-item-desc { font-family: var(--font-body); font-size: .82rem; color: var(--cream); opacity: .55; margin-top: 4px; line-height: 1.45; font-weight: 400; font-style: italic; }
 .cat-item-controls { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 .cat-size-btn { background: rgba(255,255,255,.05); border: 1px solid var(--border2); color: var(--cream); font-family: var(--font-body); font-size: .72rem; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: all .15s; white-space: nowrap; }
 .cat-size-btn:hover { border-color: var(--saffron); color: var(--saffron); }
@@ -2475,112 +2476,112 @@ let cateringCart = {};
 
 const CATERING_MENU = [
   { cat: 'Appetizers (Veg)', items: [
-    {id:'av01',name:'Paneer 65',s:85,m:105,l:150},
-    {id:'av04',name:'Chilli Paneer',s:85,m:105,l:150},
-    {id:'av11',name:'Jalapeno Paneer',s:85,m:105,l:150},
-    {id:'av02',name:'Gobi 65',s:75,m:95,l:130},
-    {id:'av12',name:'Chilli Gobi 65',s:75,m:95,l:130},
-    {id:'av05',name:'Paneer Tikka',s:85,m:105,l:150},
-    {id:'av06',name:'Hariyali Paneer Tikka',s:85,m:105,l:150},
-    {id:'av07',name:'Cut Mirchi',s:75,m:95,l:130},
-    {id:'av08',name:'Mirchi Bajji',s:75,m:95,l:130},
-    {id:'av09',name:'Onion Pakora',s:75,m:95,l:130},
-    {id:'av10',name:'BT Gobi Fry',s:75,m:95,l:130}
+    {id:'av01',name:'Paneer 65',desc:'Popular Indian appetizer made from marinated paneer cubes, deep-fried until crispy and tossed in a tangy, spicy sauce with aromatic spices.',s:85,m:105,l:150},
+    {id:'av04',name:'Chilli Paneer',desc:'Indo-Chinese dish featuring crispy fried paneer cubes tossed in a spicy, tangy sauce with bell peppers, onions, garlic, and chilies.',s:85,m:105,l:150},
+    {id:'av11',name:'Jalapeno Paneer',desc:'Crispy paneer cubes stir-fried with fresh jalapeños, onions, and bold spices for a fiery, flavorful kick.',s:85,m:105,l:150},
+    {id:'av02',name:'Gobi 65',desc:'Spicy and flavorful Indian appetizer made from cauliflower florets marinated in yogurt and spices, then deep-fried until golden and crispy.',s:75,m:95,l:130},
+    {id:'av12',name:'Chilli Gobi 65',desc:'Crispy cauliflower florets tossed in a tangy and spicy sauce with bell peppers, onions, garlic, and chilies.',s:75,m:95,l:130},
+    {id:'av05',name:'Paneer Tikka',desc:'Marinated paneer cubes grilled to perfection with a smoky and flavorful taste.',s:85,m:105,l:150},
+    {id:'av06',name:'Hariyali Paneer Tikka',desc:'Paneer marinated in a vibrant green herb and spinach paste, then grilled for a fresh and aromatic flavor.',s:85,m:105,l:150},
+    {id:'av07',name:'Cut Mirchi',desc:'Whole green chilies slit and stuffed with a tangy spiced filling, then deep-fried to a golden crisp.',s:75,m:95,l:130},
+    {id:'av08',name:'Mirchi Bajji',desc:'Large green chilies dipped in a seasoned chickpea batter and deep-fried until light and crispy.',s:75,m:95,l:130},
+    {id:'av09',name:'Onion Pakora',desc:'Crispy fritters made with thinly sliced onions, fresh herbs, and spiced chickpea batter, deep-fried to a golden crunch.',s:75,m:95,l:130},
+    {id:'av10',name:'BT Gobi Fry',desc:'Cauliflower florets tossed in BT\'s signature spice blend and pan-fried to a smoky, crispy perfection.',s:75,m:95,l:130}
   ]},
   { cat: 'Appetizers (Non-Veg)', items: [
-    {id:'an03',name:'BT Chicken Fry',s:90,m:130,l:180},
-    {id:'an04',name:'Chicken 65',s:90,m:130,l:180},
-    {id:'an05',name:'Chilli Chicken',s:90,m:130,l:180},
-    {id:'an01',name:'Chicken Lollipop (30/50/80)',s:90,m:130,l:200},
-    {id:'an12',name:'Jalapeno Chicken',s:90,m:130,l:180},
-    {id:'an14',name:'Chicken Pepper Fry',s:90,m:130,l:180},
-    {id:'an13',name:'BT Goat Sukka Fry',s:100,m:150,l:200},
-    {id:'an11',name:'BT Shrimp Apollo',s:100,m:150,l:200},
-    {id:'an06',name:'BT Tandoori Chicken',s:90,m:130,l:180},
-    {id:'an07',name:'BT Tandoori Chicken Spicy',s:90,m:130,l:180},
-    {id:'an08',name:'Chicken Tikka',s:90,m:130,l:180},
-    {id:'an09',name:'Chicken Hariyali Kabob',s:90,m:130,l:180},
-    {id:'an16',name:'BT Fish Apollo',s:100,m:140,l:180},
-    {id:'an17',name:'Malai Kabob',s:90,m:130,l:180},
-    {id:'an18',name:'Kabob Platter',s:90,m:130,l:180}
+    {id:'an03',name:'BT Chicken Fry',desc:'Spicy, deep-fried chicken marinated in a special blend of spices for a crispy and flavorful bite.',s:90,m:130,l:180},
+    {id:'an04',name:'Chicken 65',desc:'Deep-fried chicken chunks marinated in a mix of yogurt, ginger, garlic, and spices, offering a spicy and tangy flavor.',s:90,m:130,l:180},
+    {id:'an05',name:'Chilli Chicken',desc:'Indo-Chinese dish with crispy chicken pieces tossed in a spicy, tangy sauce with bell peppers, onions, garlic, and chilies.',s:90,m:130,l:180},
+    {id:'an01',name:'Chicken Lollipop (30/50/80)',desc:'Frenched chicken wings marinated and deep-fried to a crispy finish, served with a tangy and spicy dipping sauce.',s:90,m:130,l:200},
+    {id:'an12',name:'Jalapeno Chicken',desc:'Tender chicken pieces tossed with fresh jalapeños, onions, and bold spices for a fiery kick.',s:90,m:130,l:180},
+    {id:'an14',name:'Chicken Pepper Fry',desc:'Crispy chicken pieces stir-fried with cracked black pepper, curry leaves, and aromatic spices.',s:90,m:130,l:180},
+    {id:'an13',name:'BT Goat Sukka Fry',desc:'Goat meat cooked in a dry, spicy masala with a bold blend of aromatic spices.',s:100,m:150,l:200},
+    {id:'an11',name:'BT Shrimp Apollo',desc:'Succulent shrimp cooked in a tangy and spicy sauce with signature BT Indian spices.',s:100,m:150,l:200},
+    {id:'an06',name:'BT Tandoori Chicken',desc:'Chicken marinated in yogurt and spices, then grilled in a tandoor for a smoky and flavorful taste.',s:90,m:130,l:180},
+    {id:'an07',name:'BT Tandoori Chicken Spicy',desc:'Extra spicy version of tandoori chicken, marinated in a special blend of hot spices and grilled in a tandoor.',s:90,m:130,l:180},
+    {id:'an08',name:'Chicken Tikka',desc:'Boneless chicken chunks marinated in yogurt and spices, then grilled for a smoky, tender flavor.',s:90,m:130,l:180},
+    {id:'an09',name:'Chicken Hariyali Kabob',desc:'Chicken marinated in a green herb and spinach paste, then grilled for a fresh and vibrant taste.',s:90,m:130,l:180},
+    {id:'an16',name:'BT Fish Apollo',desc:'Crispy fried fish tossed in a bold and tangy spiced sauce with a signature BT twist.',s:100,m:140,l:180},
+    {id:'an17',name:'Malai Kabob',desc:'Tender chicken marinated in a creamy blend of malai, cheese, and mild spices, then grilled to perfection.',s:90,m:130,l:180},
+    {id:'an18',name:'Kabob Platter',desc:'A generous assortment of BT\'s signature tandoor-grilled kabobs, perfect for sharing at any gathering.',s:90,m:130,l:180}
   ]},
   { cat: "Biryani's (Veg)", items: [
-    {id:'bv01',name:'Mix Veggie Dum Biryani',s:75,m:95,l:125},
-    {id:'bv02',name:'BT Paneer Biryani',s:80,m:110,l:150},
-    {id:'bv03',name:'Vankaya (Eggplant) Biryani',s:75,m:95,l:125}
+    {id:'bv01',name:'Mix Veggie Dum Biryani',desc:'Aromatic basmati rice cooked with a mix of fresh vegetables and spices in the traditional dum cooking style.',s:75,m:95,l:125},
+    {id:'bv02',name:'BT Paneer Biryani',desc:'Basmati rice layered with marinated paneer cubes and spices, slow-cooked in the dum style for deep, rich flavor.',s:80,m:110,l:150},
+    {id:'bv03',name:'Vankaya (Eggplant) Biryani',desc:'Fragrant basmati rice slow-cooked with tender eggplant and a blend of South Indian spices in the dum style.',s:75,m:95,l:125}
   ]},
   { cat: "Biryani's (Non-Veg)", items: [
-    {id:'bn01',name:'Egg Dum Biryani',s:75,m:95,l:130},
-    {id:'bn02',name:'BT Chicken Dum Biryani',s:95,m:125,l:165},
-    {id:'bn03',name:'Boneless Chicken Biryani',s:95,m:125,l:165},
-    {id:'bn04',name:'BT Chicken Fry Biryani',s:95,m:125,l:165},
-    {id:'bn10',name:'BT Special Chicken Biryani',s:95,m:125,l:165},
-    {id:'bn06',name:'BT Goat Dum Biryani',s:100,m:150,l:200},
-    {id:'bn05',name:'BT Shrimp Dum Biryani',s:100,m:150,l:200},
-    {id:'bn07',name:'BT Natu Kodi Dum Biryani',s:100,m:150,l:200},
-    {id:'bn08',name:'BT Fish Biryani',s:100,m:150,l:200},
-    {id:'bn09',name:'Keema Biryani',s:100,m:150,l:200}
+    {id:'bn01',name:'Egg Dum Biryani',desc:'Flavorful basmati rice layered with boiled eggs and aromatic spices, slow-cooked in the dum style.',s:75,m:95,l:130},
+    {id:'bn02',name:'BT Chicken Dum Biryani',desc:'Traditional dum biryani with marinated chicken pieces and fragrant basmati rice, slow-cooked to perfection.',s:95,m:125,l:165},
+    {id:'bn03',name:'Boneless Chicken Biryani',desc:'Basmati rice layered with tender boneless chicken pieces and spices, slow-cooked in the dum style.',s:95,m:125,l:165},
+    {id:'bn04',name:'BT Chicken Fry Biryani',desc:'Spicy fried chicken pieces served with aromatic basmati rice and whole spices for a bold, satisfying meal.',s:95,m:125,l:165},
+    {id:'bn10',name:'BT Special Chicken Biryani',desc:'BT\'s signature biryani — fragrant basmati rice layered with specially marinated chicken and a secret blend of spices.',s:95,m:125,l:165},
+    {id:'bn06',name:'BT Goat Dum Biryani',desc:'Flavorful basmati rice layered with marinated goat meat and spices, slow-cooked in the traditional dum style.',s:100,m:150,l:200},
+    {id:'bn05',name:'BT Shrimp Dum Biryani',desc:'Basmati rice cooked with marinated shrimp and a blend of aromatic spices in the dum style.',s:100,m:150,l:200},
+    {id:'bn07',name:'BT Natu Kodi Dum Biryani',desc:'Basmati rice layered with marinated free-range country chicken and spices, slow-cooked in the dum style.',s:100,m:150,l:200},
+    {id:'bn08',name:'BT Fish Biryani',desc:'Fragrant basmati rice layered with marinated fish fillets and spices, slow-cooked in the dum style.',s:100,m:150,l:200},
+    {id:'bn09',name:'Keema Biryani',desc:'Fragrant basmati rice layered with spiced minced meat and aromatic herbs, slow-cooked in the dum style.',s:100,m:150,l:200}
   ]},
   { cat: 'Curries (Veg)', items: [
-    {id:'cv02',name:'Mixed Vegetable Curry',s:70,m:90,l:120},
-    {id:'cv09',name:'Bagara Baingan',s:70,m:90,l:120},
-    {id:'cv03',name:'Aloo Gobi',s:70,m:90,l:120},
-    {id:'cv04',name:'Mirchi Ka Saalan',s:70,m:90,l:120},
-    {id:'cv10',name:'Bhindi Masala',s:80,m:110,l:150},
-    {id:'cv05',name:'Channa Masala',s:70,m:90,l:120},
-    {id:'cv06',name:'Sambar',s:70,m:90,l:120},
-    {id:'cv01',name:'Rasam',s:55,m:75,l:100},
-    {id:'cv11',name:'Paneer Tikka Masala',s:80,m:110,l:150},
-    {id:'cv15',name:'Paneer Butter Masala',s:80,m:110,l:150},
-    {id:'cv07',name:'Dal Tadka',s:70,m:90,l:120},
-    {id:'cv12',name:'Bhindi Fry',s:90,m:130,l:180},
-    {id:'cv13',name:'Palak Paneer',s:80,m:110,l:150},
-    {id:'cv16',name:'Saag Paneer',s:80,m:110,l:150},
-    {id:'cv14',name:'Malai Kofta',s:75,m:100,l:140}
+    {id:'cv02',name:'Mixed Vegetable Curry',desc:'A medley of fresh vegetables cooked in a flavorful and spicy gravy.',s:70,m:90,l:120},
+    {id:'cv09',name:'Bagara Baingan',desc:'Eggplant cooked in a rich and tangy peanut-coconut sauce with a blend of aromatic spices.',s:70,m:90,l:120},
+    {id:'cv03',name:'Aloo Gobi',desc:'Classic Indian comfort dish of potatoes and cauliflower cooked with turmeric, cumin, and aromatic spices.',s:70,m:90,l:120},
+    {id:'cv04',name:'Mirchi Ka Saalan',desc:'Spicy curry made with large green chilies simmered in a tangy and nutty peanut-sesame sauce.',s:70,m:90,l:120},
+    {id:'cv10',name:'Bhindi Masala',desc:'Okra cooked in a spicy and tangy masala sauce with onions, tomatoes, and aromatic spices.',s:80,m:110,l:150},
+    {id:'cv05',name:'Channa Masala',desc:'Chickpeas cooked in a spicy and tangy tomato-based sauce with aromatic spices.',s:70,m:90,l:120},
+    {id:'cv06',name:'Sambar',desc:'Traditional South Indian lentil stew made with tamarind, vegetables, and a blend of sambar spices.',s:70,m:90,l:120},
+    {id:'cv01',name:'Rasam',desc:'Spicy and tangy South Indian soup made with tamarind, tomatoes, and a blend of warming spices.',s:55,m:75,l:100},
+    {id:'cv11',name:'Paneer Tikka Masala',desc:'Grilled paneer cubes simmered in a rich and creamy tomato-based gravy.',s:80,m:110,l:150},
+    {id:'cv15',name:'Paneer Butter Masala',desc:'Soft paneer cubes simmered in a velvety, mildly spiced tomato-butter sauce with a touch of cream.',s:80,m:110,l:150},
+    {id:'cv07',name:'Dal Tadka',desc:'Yellow lentils cooked with a tempering of cumin, garlic, and ghee, offering a flavorful and aromatic dish.',s:70,m:90,l:120},
+    {id:'cv12',name:'Bhindi Fry',desc:'Fresh okra stir-fried with onions, tomatoes, and a bold blend of Indian spices until perfectly caramelized.',s:90,m:130,l:180},
+    {id:'cv13',name:'Palak Paneer',desc:'Soft paneer cubes simmered in a velvety, spiced spinach gravy with a touch of cream.',s:80,m:110,l:150},
+    {id:'cv16',name:'Saag Paneer',desc:'Tender paneer cubes cooked in a rich, slow-simmered blend of spiced greens for a hearty, earthy flavor.',s:80,m:110,l:150},
+    {id:'cv14',name:'Malai Kofta',desc:'Soft cottage cheese and potato dumplings simmered in a rich, creamy tomato-based gravy.',s:75,m:100,l:140}
   ]},
   { cat: 'Curries (Non-Veg)', items: [
-    {id:'cn01',name:'BT Chicken Curry',s:90,m:120,l:160},
-    {id:'cn02',name:'Butter Chicken',s:90,m:120,l:160},
-    {id:'cn03',name:'Chicken Tikka Masala',s:90,m:120,l:160},
-    {id:'cn04',name:'Kara-hi Chicken',s:90,m:120,l:160},
-    {id:'cn06',name:'BT Mutton Curry',s:100,m:150,l:200},
-    {id:'cn07',name:'Dum Ka Ghosh',s:100,m:150,l:200},
-    {id:'cn08',name:'BT Fish Curry',s:100,m:150,l:200},
-    {id:'cn05',name:'BT Shrimp Curry',s:100,m:150,l:200},
-    {id:'cn09',name:'Keema Curry',s:100,m:150,l:200},
-    {id:'cn10',name:'Egg Masala',s:80,m:110,l:140},
-    {id:'cn11',name:'Egg Burji',s:80,m:110,l:140},
-    {id:'cn12',name:'Dum-Ka-Murg',s:90,m:120,l:160},
-    {id:'cn13',name:'Natu Kodi (Country Chicken) Curry',s:100,m:150,l:200}
+    {id:'cn01',name:'BT Chicken Curry',desc:'Tender chicken pieces cooked in a spicy and flavorful gravy with BT\'s signature blend of spices.',s:90,m:120,l:160},
+    {id:'cn02',name:'Butter Chicken',desc:'Marinated chicken cooked in a rich and creamy tomato-based sauce — a timeless classic.',s:90,m:120,l:160},
+    {id:'cn03',name:'Chicken Tikka Masala',desc:'Grilled chicken pieces simmered in a creamy and spicy tomato-based sauce.',s:90,m:120,l:160},
+    {id:'cn04',name:'Kara-hi Chicken',desc:'Chicken cooked in a wok with bell peppers, tomatoes, and a bold blend of spices.',s:90,m:120,l:160},
+    {id:'cn06',name:'BT Mutton Curry',desc:'Tender mutton pieces slow-cooked in a rich and spicy gravy with aromatic whole spices.',s:100,m:150,l:200},
+    {id:'cn07',name:'Dum Ka Ghosh',desc:'Slow-cooked mutton in a rich and aromatic gravy with a blend of whole spices.',s:100,m:150,l:200},
+    {id:'cn08',name:'BT Fish Curry',desc:'Fish fillets simmered in a tangy and spicy coconut-based curry.',s:100,m:150,l:200},
+    {id:'cn05',name:'BT Shrimp Curry',desc:'Spicy and flavorful shrimp cooked in a rich, tangy curry sauce.',s:100,m:150,l:200},
+    {id:'cn09',name:'Keema Curry',desc:'Spiced minced meat slow-cooked in a rich, aromatic gravy with onions, tomatoes, and Indian spices.',s:100,m:150,l:200},
+    {id:'cn10',name:'Egg Masala',desc:'Boiled eggs simmered in a bold, tangy tomato and onion-based masala sauce with aromatic spices.',s:80,m:110,l:140},
+    {id:'cn11',name:'Egg Burji',desc:'Scrambled eggs cooked with onions, tomatoes, green chilies, and a blend of Indian spices.',s:80,m:110,l:140},
+    {id:'cn12',name:'Dum-Ka-Murg',desc:'Tender whole chicken slow-cooked in a rich, aromatic gravy using the traditional dum technique.',s:90,m:120,l:160},
+    {id:'cn13',name:'Natu Kodi (Country Chicken) Curry',desc:'Free-range country chicken slow-cooked in a robust, rustic gravy with bold South Indian spices.',s:100,m:150,l:200}
   ]},
   { cat: 'Rice / Noodles (Veg)', items: [
-    {id:'rn01',name:'Vegetable Fried Rice',s:70,m:90,l:125},
-    {id:'rn07',name:'Veg Noodles',s:70,m:90,l:125},
-    {id:'rn12',name:'Muddapappu Avakaya Rice',s:70,m:90,l:125}
+    {id:'rn01',name:'Vegetable Fried Rice',desc:'Basmati rice stir-fried with a mix of fresh vegetables and aromatic spices.',s:70,m:90,l:125},
+    {id:'rn07',name:'Veg Noodles',desc:'Stir-fried noodles tossed with crunchy fresh vegetables and savory Indo-Chinese seasonings.',s:70,m:90,l:125},
+    {id:'rn12',name:'Muddapappu Avakaya Rice',desc:'Traditional Andhra-style rice mixed with earthy lentils and tangy raw mango pickle for a bold, authentic flavor.',s:70,m:90,l:125}
   ]},
   { cat: 'Rice / Noodles (Non-Veg)', items: [
-    {id:'rn02',name:'Egg Fried Rice',s:70,m:90,l:125},
-    {id:'rn03',name:'Chicken Fried Rice',s:90,m:120,l:160},
-    {id:'rn06',name:'Shrimp Fried Rice',s:100,m:150,l:200},
-    {id:'rn08',name:'Chicken Noodles',s:90,m:120,l:160},
-    {id:'rn09',name:'Shrimp Noodles',s:100,m:150,l:200}
+    {id:'rn02',name:'Egg Fried Rice',desc:'Basmati rice stir-fried with eggs and a blend of fresh vegetables and spices.',s:70,m:90,l:125},
+    {id:'rn03',name:'Chicken Fried Rice',desc:'Basmati rice stir-fried with chicken pieces, fresh vegetables, and savory spices.',s:90,m:120,l:160},
+    {id:'rn06',name:'Shrimp Fried Rice',desc:'Basmati rice stir-fried with succulent shrimp, fresh vegetables, and aromatic spices.',s:100,m:150,l:200},
+    {id:'rn08',name:'Chicken Noodles',desc:'Stir-fried noodles tossed with tender chicken pieces, fresh vegetables, and savory Indo-Chinese spices.',s:90,m:120,l:160},
+    {id:'rn09',name:'Shrimp Noodles',desc:'Stir-fried noodles with succulent shrimp, crunchy vegetables, and bold Indo-Chinese seasonings.',s:100,m:150,l:200}
   ]},
   { cat: 'Sides', items: [
-    {id:'si01',name:'Raita',s:55,m:75,l:100},
-    {id:'si02',name:'Salan',s:55,m:75,l:100}
+    {id:'si01',name:'Raita',desc:'Yogurt-based side dish with chopped vegetables and spices, offering a cool and refreshing complement to spicy dishes.',s:55,m:75,l:100},
+    {id:'si02',name:'Salan',desc:'Spicy and tangy curry sauce typically served alongside biryani for extra richness and flavor.',s:55,m:75,l:100}
   ]},
   { cat: "Roti's / Breads", perPiece: true, items: [
-    {id:'rb01',name:'Plain Naan',pp:2.99},
-    {id:'rb02',name:'Butter Naan',pp:2.99},
-    {id:'rb03',name:'Garlic Naan',pp:3.49},
-    {id:'rb04',name:'Onion Kulcha',pp:4.99},
-    {id:'rb05',name:'Paneer Naan',pp:4.99},
-    {id:'rb06',name:'Chicken Tikka Naan',pp:5.99}
+    {id:'rb01',name:'Plain Naan',desc:'Traditional soft and fluffy Indian flatbread, freshly baked in a tandoor oven.',pp:2.99},
+    {id:'rb02',name:'Butter Naan',desc:'Soft and fluffy flatbread brushed generously with melted butter, baked fresh in a tandoor.',pp:2.99},
+    {id:'rb03',name:'Garlic Naan',desc:'Soft and fluffy flatbread infused with the flavor of fresh garlic, baked in a tandoor oven.',pp:3.49},
+    {id:'rb04',name:'Onion Kulcha',desc:'Soft leavened flatbread stuffed with seasoned onions and herbs, baked fresh in a tandoor oven.',pp:4.99},
+    {id:'rb05',name:'Paneer Naan',desc:'Fluffy tandoor-baked flatbread stuffed with spiced paneer and fresh herbs.',pp:4.99},
+    {id:'rb06',name:'Chicken Tikka Naan',desc:'Soft naan stuffed with flavorful chicken tikka filling, baked fresh in a tandoor oven.',pp:5.99}
   ]},
   { cat: 'Dessert', items: [
-    {id:'ds01',name:'Double Ka Meeta',s:50,m:75,l:100},
-    {id:'ds02',name:'Rasmalai',s:50,m:75,l:100},
-    {id:'ds03',name:'Gulab Jamun',s:50,m:75,l:100}
+    {id:'ds01',name:'Double Ka Meeta',desc:'Traditional Hyderabadi dessert made from bread, milk, and sugar, garnished with nuts and saffron.',s:50,m:75,l:100},
+    {id:'ds02',name:'Rasmalai',desc:'Soft cheese patties soaked in sweet, saffron-flavored milk, garnished with pistachios.',s:50,m:75,l:100},
+    {id:'ds03',name:'Gulab Jamun',desc:'Soft and spongy milk-based sweets soaked in a fragrant rose-flavored sugar syrup.',s:50,m:75,l:100}
   ]}
 ];
 
@@ -2600,7 +2601,10 @@ function _renderCatItem(item, isPerPiece) {
   if (isPerPiece) {
     const qty = cateringCart[item.id]?.qty || 0;
     return `<div class="cat-item-row" id="cat-row-${item.id}">
-      <div class="cat-item-name">${_esc(item.name)} <span style="color:var(--accent);font-size:.78rem">$${item.pp.toFixed(2)}/ea</span></div>
+      <div style="flex:1;min-width:0;padding-right:12px">
+        <div class="cat-item-name">${_esc(item.name)} <span style="color:var(--accent);font-size:.78rem">$${item.pp.toFixed(2)}/ea</span></div>
+        ${item.desc ? `<div class="cat-item-desc">${_esc(item.desc)}</div>` : ''}
+      </div>
       <div class="cat-item-controls">
         <div class="cat-qty-wrap">
           <button type="button" class="cat-qty-btn" onclick="catBreadQty('${item.id}',${item.pp},-1)" aria-label="Decrease quantity">−</button>
@@ -2613,7 +2617,10 @@ function _renderCatItem(item, isPerPiece) {
   const sL = {s:'S',m:'M',l:'L'};
   const sN = {s:'Small (10-12)',m:'Medium (18-20)',l:'Large (25-28)'};
   return `<div class="cat-item-row" id="cat-row-${item.id}">
-    <div class="cat-item-name">${_esc(item.name)}</div>
+    <div style="flex:1;min-width:0;padding-right:12px">
+      <div class="cat-item-name">${_esc(item.name)}</div>
+      ${item.desc ? `<div class="cat-item-desc">${_esc(item.desc)}</div>` : ''}
+    </div>
     <div class="cat-item-controls" id="cat-ctrl-${item.id}">
       ${['s','m','l'].map(sz => {
         const price = item[sz];
